@@ -26,7 +26,7 @@ package adaptations_pkg is
   constant C_ALERT_FILE_NAME : string := "_Alert.txt";
   constant C_LOG_FILE_NAME   : string := "_Log.txt";
 
-  constant C_SHOW_UVVM_UTILITY_LIBRARY_INFO         : boolean := true;  -- Set this to false when you no longer need the initial info
+  constant C_SHOW_UVVM_UTILITY_LIBRARY_INFO         : boolean := false;  -- Set this to false when you no longer need the initial info
   constant C_SHOW_UVVM_UTILITY_LIBRARY_RELEASE_INFO : boolean := true;  -- Set this to false when you no longer need the release info
 
   constant C_UVVM_TIMEOUT    : time := 100 us; -- General timeout for UVVM wait statements
@@ -40,11 +40,11 @@ package adaptations_pkg is
 
   constant C_LOG_PREFIX_WIDTH   : natural := C_LOG_PREFIX'length;
   constant C_LOG_MSG_ID_WIDTH   : natural := 24;
-  constant C_LOG_TIME_WIDTH     : natural := 16; -- 3 chars used for unit eg. " ns"
+  constant C_LOG_TIME_WIDTH     : natural := 12; -- 3 chars used for unit eg. " ns"
   constant C_LOG_TIME_BASE      : time    := ns; -- Unit in which time is shown in log (ns | ps)
   constant C_LOG_TIME_DECIMALS  : natural := 1; -- Decimals to show for given C_LOG_TIME_BASE
-  constant C_LOG_SCOPE_WIDTH    : natural := 30;
-  constant C_LOG_LINE_WIDTH     : natural := 175;
+  constant C_LOG_SCOPE_WIDTH    : natural := 16;
+  constant C_LOG_LINE_WIDTH     : natural := 200;
   constant C_LOG_INFO_WIDTH     : natural := C_LOG_LINE_WIDTH - C_LOG_PREFIX_WIDTH;
 
   constant C_USE_BACKSLASH_N_AS_LF : boolean := true; -- If true interprets '\n' as Line feed
