@@ -23,35 +23,13 @@ use work.types_pkg.all;
 use work.string_methods_pkg.all;
 use work.adaptations_pkg.all;
 use work.license_pkg.all;
+use work.global_signals_and_shared_variables_pkg.all;
 use work.alert_hierarchy_pkg.all;
 use work.protected_types_pkg.all;
 use std.env.all;
 
 
 package methods_pkg is
-  -- Shared variables
-  shared variable shared_initialised_util        : boolean  := false;
-  shared variable shared_msg_id_panel            : t_msg_id_panel   := C_MSG_ID_PANEL_DEFAULT;
-  shared variable shared_log_file_name_is_set    : boolean  := false;
-  shared variable shared_alert_file_name_is_set  : boolean  := false;
-  shared variable shared_warned_time_stamp_trunc : boolean  := false;
-  shared variable shared_alert_attention         : t_alert_attention:= C_DEFAULT_ALERT_ATTENTION;
-  shared variable shared_stop_limit              : t_alert_counters := C_DEFAULT_STOP_LIMIT;
-  shared variable shared_log_hdr_for_waveview    : string(1 to C_LOG_HDR_FOR_WAVEVIEW_WIDTH);
-  shared variable shared_current_log_hdr         : t_current_log_hdr;
-  shared variable shared_seed1                   : positive;
-  shared variable shared_seed2                   : positive;
-  shared variable shared_flag_array              : t_sync_flag_record_array := (others => C_SYNC_FLAG_DEFAULT);
-  shared variable protected_semaphore            : t_protected_semaphore;
-  shared variable protected_broadcast_semaphore  : t_protected_semaphore;
-  shared variable protected_response_semaphore   : t_protected_semaphore;
-  shared variable shared_uvvm_status             : t_uvvm_status;
-
-
-  signal global_trigger : std_logic := 'L';
-  signal global_barrier : std_logic := 'X';
-
-
 
 -- -- ============================================================================
 -- -- Initialisation and license
@@ -131,7 +109,6 @@ package methods_pkg is
     variable my_line      : inout line
   );
 
-  -- Enable and Disable do not have a Scope parameter as they are only allowed from main test sequencer
   procedure enable_log_msg(
     constant msg_id         : t_msg_id;
     variable msg_id_panel   : inout t_msg_id_panel;
@@ -143,12 +120,14 @@ package methods_pkg is
   procedure enable_log_msg(
     msg_id         : t_msg_id;
     msg            : string;
-    quietness      : t_quietness := NON_QUIET
+    quietness      : t_quietness := NON_QUIET;
+    scope          : string      := C_TB_SCOPE_DEFAULT
     ) ;
 
   procedure enable_log_msg(
     msg_id         : t_msg_id;
-    quietness      : t_quietness := NON_QUIET
+    quietness      : t_quietness := NON_QUIET;
+    scope          : string      := C_TB_SCOPE_DEFAULT
     ) ;
 
   procedure disable_log_msg(
@@ -162,12 +141,14 @@ package methods_pkg is
   procedure disable_log_msg(
     msg_id         : t_msg_id;
     msg            : string;
-    quietness      : t_quietness := NON_QUIET
+    quietness      : t_quietness := NON_QUIET;
+    scope          : string      := C_TB_SCOPE_DEFAULT
     );
 
   procedure disable_log_msg(
     msg_id         : t_msg_id;
-    quietness      : t_quietness := NON_QUIET
+    quietness      : t_quietness := NON_QUIET;
+    scope          : string      := C_TB_SCOPE_DEFAULT
     );
 
   impure function is_log_msg_enabled(
@@ -289,6 +270,13 @@ package methods_pkg is
     number     : natural := 1
     );
 
+  procedure increment_expected_alerts_and_stop_limit(
+    constant alert_level  : t_alert_level;
+    constant number       : natural := 1;
+    constant msg          : string  := "";
+    constant scope        : string  := C_TB_SCOPE_DEFAULT
+  );
+
 
 -- ============================================================================
 -- Deprecate message
@@ -373,7 +361,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -387,7 +375,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -401,7 +389,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -415,7 +403,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -474,7 +462,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -488,7 +476,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -502,7 +490,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -539,7 +527,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -553,7 +541,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -567,7 +555,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -581,7 +569,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -663,7 +651,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -677,7 +665,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -691,7 +679,7 @@ package methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -998,8 +986,9 @@ package methods_pkg is
   --          Function is only included to support internal functionality.
   --          The function can be removed without notification.
   function matching_values(
-    value1: std_logic_vector;
-    value2: std_logic_vector
+    constant value1           : in std_logic_vector;
+    constant value2           : in std_logic_vector;
+    constant match_strictness : in t_match_strictness := MATCH_STD
   ) return boolean;
 
 
@@ -1585,19 +1574,22 @@ package methods_pkg is
      variable line_to_be_deallocated      : inout line
   );
 -- ============================================================================
--- Synchronisation methods
+-- Synchronization methods
 -- ============================================================================
   -- method to block a global flag with the name flag_name
   procedure block_flag(
-    constant flag_name : in string;
-    constant msg : in string
+    constant flag_name                : in string;
+    constant msg                      : in string;
+    constant already_blocked_severity : in t_alert_level := WARNING;
+    constant scope                    : in string := C_TB_SCOPE_DEFAULT
   );
 
   -- method to unblock a global flag with the name flag_name
   procedure unblock_flag(
     constant flag_name : in string;
     constant msg       : in string;
-    signal   trigger   : inout std_logic
+    signal   trigger   : inout std_logic; -- Parameter must be global_trigger as method await_unblock_flag() uses that global signal to detect unblocking.
+    constant scope     : in string := C_TB_SCOPE_DEFAULT
   );
 
   -- method to wait for the global flag with the name flag_name
@@ -1606,13 +1598,15 @@ package methods_pkg is
     constant timeout          : in time;
     constant msg              : in string;
     constant flag_returning   : in t_flag_returning := KEEP_UNBLOCKED;
-    constant timeout_severity : in t_alert_level := ERROR
+    constant timeout_severity : in t_alert_level := ERROR;
+    constant scope            : in string := C_TB_SCOPE_DEFAULT
   );
   procedure await_barrier(
     signal   barrier_signal   : inout std_logic;
     constant timeout          : in time;
     constant msg              : in string;
-    constant timeout_severity : in t_alert_level := ERROR
+    constant timeout_severity : in t_alert_level := ERROR;
+    constant scope            : in string := C_TB_SCOPE_DEFAULT
   );
   -------------------------------------------
   -- await_semaphore_in_delta_cycles
@@ -1930,6 +1924,8 @@ package body methods_pkg is
     variable v_log_msg_id        : string(1 to C_LOG_MSG_ID_WIDTH);
     variable v_log_scope         : string(1 to C_LOG_SCOPE_WIDTH);
     variable v_log_pre_msg_width : natural;
+    variable v_idx                : natural := 1;
+
   begin
     -- Check if message ID is enabled
     if (msg_id_panel(msg_id) = ENABLED) then
@@ -1953,13 +1949,21 @@ package body methods_pkg is
       v_log_pre_msg_width := v_info'length;      -- Width of string preceeding the actual message
       -- Handle \r as potential initial open line
       if msg'length > 1 then
-        if C_USE_BACKSLASH_R_AS_LF and (msg(1 to 2) = "\r") then
-          write(v_info_final, LF);  -- Start transcript with an empty line
-          write(v_msg, remove_initial_chars(msg, 2));
+        if C_USE_BACKSLASH_R_AS_LF then
+          loop
+            if (msg(v_idx to v_idx+1) = "\r") then
+              write(v_info_final, LF);  -- Start transcript with an empty line
+              v_idx := v_idx + 2;
+            else
+              write(v_msg, remove_initial_chars(msg, v_idx-1));
+              exit;
+            end if;
+          end loop;
         else
           write(v_msg, msg);
         end if;
       end if;
+
 
       -- Handle dedicated ID indentation.
       write(v_msg_indent, to_string(C_MSG_ID_INDENT(msg_id)));
@@ -2207,18 +2211,20 @@ package body methods_pkg is
   procedure enable_log_msg(
     msg_id         : t_msg_id;
     msg            : string;
-    quietness      : t_quietness := NON_QUIET
+    quietness      : t_quietness := NON_QUIET;
+    scope          : string      := C_TB_SCOPE_DEFAULT
     ) is
   begin
-    enable_log_msg(msg_id, shared_msg_id_panel, msg, C_TB_SCOPE_DEFAULT, quietness);
+    enable_log_msg(msg_id, shared_msg_id_panel, msg, scope, quietness);
   end;
 
   procedure enable_log_msg(
     msg_id         : t_msg_id;
-    quietness      : t_quietness := NON_QUIET
+    quietness      : t_quietness := NON_QUIET;
+    scope          : string      := C_TB_SCOPE_DEFAULT
     ) is
   begin
-    enable_log_msg(msg_id, shared_msg_id_panel, "", C_TB_SCOPE_DEFAULT, quietness);
+    enable_log_msg(msg_id, shared_msg_id_panel, "", scope, quietness);
   end;
 
   procedure disable_log_msg(
@@ -2237,6 +2243,7 @@ package body methods_pkg is
         for i in t_msg_id'left to t_msg_id'right loop
           msg_id_panel(i) := DISABLED;
         end loop;
+        msg_id_panel(ID_LOG_MSG_CTRL) := ENABLED; -- keep
       when others =>
         msg_id_panel(msg_id) := DISABLED;
         if quietness = NON_QUIET then
@@ -2248,18 +2255,20 @@ package body methods_pkg is
   procedure disable_log_msg(
     msg_id         : t_msg_id;
     msg            : string;
-    quietness      : t_quietness := NON_QUIET
+    quietness      : t_quietness := NON_QUIET;
+    scope          : string      := C_TB_SCOPE_DEFAULT
     ) is
   begin
-    disable_log_msg(msg_id, shared_msg_id_panel, msg, C_TB_SCOPE_DEFAULT, quietness);
+    disable_log_msg(msg_id, shared_msg_id_panel, msg, scope, quietness);
   end;
 
   procedure disable_log_msg(
     msg_id         : t_msg_id;
-    quietness      : t_quietness := NON_QUIET
+    quietness      : t_quietness := NON_QUIET;
+    scope          : string      := C_TB_SCOPE_DEFAULT
     ) is
   begin
-    disable_log_msg(msg_id, shared_msg_id_panel, "", C_TB_SCOPE_DEFAULT, quietness);
+    disable_log_msg(msg_id, shared_msg_id_panel, "", scope, quietness);
   end;
 
   impure function is_log_msg_enabled(
@@ -2376,7 +2385,7 @@ package body methods_pkg is
           if (get_alert_stop_limit(alert_level) /= 0) then
             if (get_alert_counter(alert_level) >= get_alert_stop_limit(alert_level)) then
               if C_USE_STD_STOP_ON_ALERT_STOP_LIMIT then
-                std.env.stop;
+                std.env.stop(1);
               else
                 assert false report "This single Failure line has been provoked to stop the simulation. See alert-message above" severity failure;
               end if;
@@ -2515,12 +2524,12 @@ package body methods_pkg is
         fill_string('-', (C_LOG_LINE_WIDTH - prefix'length)) & LF &
         "***  REPORT OF GLOBAL CTRL ***" & LF &
         fill_string('-', (C_LOG_LINE_WIDTH - prefix'length)) & LF &
-        "                          IGNORE    STOP_LIMIT                      " & LF);
+        "                          IGNORE    STOP_LIMIT" & LF);
     for i in NOTE to t_alert_level'right loop
       write(v_line, "          " & to_upper(to_string(i, 13, LEFT)) & ": ");          -- Severity
 
       write(v_line, to_string(get_alert_attention(i),      7, RIGHT) & "    ");       -- column 1
-      write(v_line, to_string(integer'(get_alert_stop_limit(i)), 6, RIGHT, KEEP_LEADING_SPACE) & "    " & LF);  -- column 2
+      write(v_line, to_string(integer'(get_alert_stop_limit(i)), 6, RIGHT, KEEP_LEADING_SPACE) & LF);  -- column 2
     end loop;
     write(v_line, fill_string('-', (C_LOG_LINE_WIDTH - prefix'length)) & LF);
 
@@ -2550,7 +2559,7 @@ package body methods_pkg is
       for i in t_msg_id'left to t_msg_id'right loop
         if ((i /= ALL_MESSAGES) and ((i /= NO_ID) and (i /= ID_NEVER))) then  -- report all but ID_NEVER, NO_ID and ALL_MESSAGES
         write(v_line, "          " & to_upper(to_string(i, C_LOG_MSG_ID_WIDTH+5, LEFT)) & ": ");  -- MSG_ID
-        write(v_line,to_upper(to_string(shared_msg_id_panel(i))) & "    " & LF); -- Enabled/disabled
+        write(v_line,to_upper(to_string(shared_msg_id_panel(i))) & LF); -- Enabled/disabled
         end if;
       end loop;
       write(v_line, fill_string('-', (C_LOG_LINE_WIDTH - prefix'length)) & LF);
@@ -2647,32 +2656,61 @@ package body methods_pkg is
       ) is
     type alert_array is array (1 to 6) of t_alert_level;
     constant alert_check_array : alert_array := (WARNING, TB_WARNING, ERROR, TB_ERROR, FAILURE, TB_FAILURE);
-    alias warning_and_worse is shared_uvvm_status.no_unexpected_simulation_warnings_or_worse;
-    alias error_and_worse   is shared_uvvm_status.no_unexpected_simulation_errors_or_worse;
+    alias found_unexpected_simulation_warnings_or_worse     is shared_uvvm_status.found_unexpected_simulation_warnings_or_worse;
+    alias found_unexpected_simulation_errors_or_worse       is shared_uvvm_status.found_unexpected_simulation_errors_or_worse;
+    alias mismatch_on_expected_simulation_warnings_or_worse is shared_uvvm_status.mismatch_on_expected_simulation_warnings_or_worse;
+    alias mismatch_on_expected_simulation_errors_or_worse   is shared_uvvm_status.mismatch_on_expected_simulation_errors_or_worse;
   begin
     protected_alert_attention_counters.increment(alert_level, attention, number);
 
     -- Update simulation status
     if (attention = REGARD) or (attention = EXPECT) then
       if (alert_level /= NO_ALERT) and (alert_level /= NOTE) and (alert_level /= TB_NOTE) and (alert_level /= MANUAL_CHECK) then
-        warning_and_worse := 1; -- default
-        error_and_worse   := 1; -- default
+        found_unexpected_simulation_warnings_or_worse     := 0; -- default
+        found_unexpected_simulation_errors_or_worse       := 0; -- default
+        mismatch_on_expected_simulation_warnings_or_worse := 0; -- default
+        mismatch_on_expected_simulation_errors_or_worse   := 0; -- default
 
         -- Compare expected and current allerts
         for i in 1 to alert_check_array'high loop
-          if (get_alert_counter(alert_check_array(i), REGARD) > get_alert_counter(alert_check_array(i), EXPECT)) then
-            -- warning and worse
-            warning_and_worse := 0;
-            -- error and worse
+          if (get_alert_counter(alert_check_array(i), REGARD) /= get_alert_counter(alert_check_array(i), EXPECT)) then
+
+            -- MISMATCH
+            -- warning or worse
+            mismatch_on_expected_simulation_warnings_or_worse := 1;
+            -- error or worse
             if not(alert_check_array(i) = WARNING) and not(alert_check_array(i) = TB_WARNING) then
-              error_and_worse := 0;
+              mismatch_on_expected_simulation_errors_or_worse := 1;
             end if;
+
+            -- FOUND UNEXPECTED ALERT
+            if (get_alert_counter(alert_check_array(i), REGARD) > get_alert_counter(alert_check_array(i), EXPECT)) then
+              -- warning and worse
+              found_unexpected_simulation_warnings_or_worse := 1;
+              -- error and worse
+              if not(alert_check_array(i) = WARNING) and not(alert_check_array(i) = TB_WARNING) then
+                found_unexpected_simulation_errors_or_worse := 1;
+              end if;
+            end if;
+
           end if;
         end loop;
-      end if;
 
+      end if;
     end if;
   end;
+
+  procedure increment_expected_alerts_and_stop_limit(
+    constant alert_level  : t_alert_level;
+    constant number       : natural := 1;
+    constant msg          : string  := "";
+    constant scope        : string  := C_TB_SCOPE_DEFAULT
+  ) is
+    variable v_alert_stop_limit : natural := get_alert_stop_limit(alert_level);
+  begin
+    increment_expected_alerts(alert_level, number, msg, scope);
+    set_alert_stop_limit(alert_level, v_alert_stop_limit + number);
+  end ;
 
 
 -- ============================================================================
@@ -2740,16 +2778,20 @@ package body methods_pkg is
 
   -- Matching if same width or only zeros in "extended width"
   function matching_widths(
-    value1: std_logic_vector;
-    value2: std_logic_vector
+    value1           : std_logic_vector;
+    value2           : std_logic_vector
     ) return boolean is
     -- Normalize vectors to (N downto 0)
     alias    a_value1: std_logic_vector(value1'length - 1 downto 0) is value1;
     alias    a_value2: std_logic_vector(value2'length - 1 downto 0) is value2;
 
   begin
-    if (a_value1'left >= maximum( idx_leftmost_p1_in_p2('1', a_value2), 0)) and
-       (a_value2'left >= maximum( idx_leftmost_p1_in_p2('1', a_value1), 0)) then
+    if (a_value1'left >= maximum( idx_leftmost_p1_in_p2('1', a_value2), 0) and
+        a_value1'left >= maximum( idx_leftmost_p1_in_p2('H', a_value2), 0) and
+        a_value1'left >= maximum( idx_leftmost_p1_in_p2('Z', a_value2), 0)) and
+       (a_value2'left >= maximum( idx_leftmost_p1_in_p2('1', a_value1), 0) and
+        a_value2'left >= maximum( idx_leftmost_p1_in_p2('H', a_value1), 0) and
+        a_value2'left >= maximum( idx_leftmost_p1_in_p2('Z', a_value1), 0)) then
       return true;
     else
       return false;
@@ -2772,12 +2814,12 @@ package body methods_pkg is
     return matching_widths(std_logic_vector(value1), std_logic_vector(value2));
   end;
 
-
   -- Compare values, but ignore any leading zero's at higher indexes than v_min_length-1.
   function matching_values(
-    value1: std_logic_vector;
-    value2: std_logic_vector
-    ) return boolean is
+    constant value1           : in std_logic_vector;
+    constant value2           : in std_logic_vector;
+    constant match_strictness : in t_match_strictness := MATCH_STD
+  ) return boolean is
     -- Normalize vectors to (N downto 0)
     alias    a_value1  : std_logic_vector(value1'length - 1 downto 0) is value1;
     alias    a_value2  : std_logic_vector(value2'length - 1 downto 0) is value2;
@@ -2785,9 +2827,29 @@ package body methods_pkg is
     variable v_match      : boolean := true;  -- as default prior to checking
   begin
     if matching_widths(a_value1, a_value2) then
-      if not std_match( a_value1(v_min_length-1 downto 0), a_value2(v_min_length-1 downto 0) ) then
-          v_match := false;
-      end if;
+
+      case match_strictness is
+
+        when MATCH_STD =>
+          if not std_match( a_value1(v_min_length-1 downto 0), a_value2(v_min_length-1 downto 0) ) then
+            v_match := false;
+          end if;
+
+        when MATCH_STD_INCL_Z =>
+          for i in v_min_length-1 downto 0 loop
+            if not(std_match(a_value1(i), a_value2(i)) or (a_value1(i) = 'Z' and a_value2(i) = 'Z')) then
+              v_match := false;
+              exit;
+            end if;
+          end loop;
+
+        when others =>
+          if a_value1(v_min_length-1 downto 0) /= a_value2(v_min_length-1 downto 0) then
+            v_match := false;
+          end if;
+
+      end case;
+
     else
       v_match := false;
     end if;
@@ -2864,24 +2926,40 @@ package body methods_pkg is
     constant caller_name : string          := "check_value()"
     ) return boolean is
     constant value_type  : string          := "std_logic";
-    constant v_value_str : string := to_string(value);
-    constant v_exp_str   : string := to_string(exp);
+    constant v_value_str : string  := to_string(value);
+    constant v_exp_str   : string  := to_string(exp);
+    variable v_failed    : boolean := false;
   begin
-    if std_match(value, exp) then
-      if value = exp then
-        log(msg_id, caller_name & " => OK, for " & value_type & " '" & v_value_str & "'. " & add_msg_delimiter(msg), scope, msg_id_panel);
-      else
-        if match_strictness = MATCH_STD then
+    case match_strictness is
+
+      when MATCH_STD =>
+        if std_match(value, exp) then
           log(msg_id, caller_name & " => OK, for " & value_type & " '" & v_value_str & "' (exp: '" & v_exp_str & "'). " & add_msg_delimiter(msg), scope, msg_id_panel);
         else
-          alert(alert_level, caller_name & " => Failed. " & value_type & "  Was '"  & v_value_str & "'. Expected '" & v_exp_str & "'" & LF & msg, scope);
-          return false;
+          v_failed := true;
         end if;
-      end if;
-      return true;
-    else
+
+      when MATCH_STD_INCL_Z =>
+        if (value = 'Z' and exp = 'Z') or std_match(value, exp) then
+          log(msg_id, caller_name & " => OK, for " & value_type & " '" & v_value_str & "' (exp: '" & v_exp_str & "'). " & add_msg_delimiter(msg), scope, msg_id_panel);
+        else
+          v_failed := true;
+        end if;
+
+      when others =>
+        if value = exp then
+          log(msg_id, caller_name & " => OK, for " & value_type & " '" & v_value_str & "'. " & add_msg_delimiter(msg), scope, msg_id_panel);
+        else
+          v_failed := true;
+        end if;
+
+    end case;
+
+    if v_failed = true then
       alert(alert_level, caller_name & " => Failed. " & value_type & "  Was '"  & v_value_str & "'. Expected '" & v_exp_str & "'" & LF & msg, scope);
       return false;
+    else
+      return true;
     end if;
   end;
 
@@ -2910,7 +2988,7 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -2922,13 +3000,23 @@ package body methods_pkg is
     constant v_value_str : string := to_string(a_value, radix, format,INCL_RADIX);
     constant v_exp_str   : string := to_string(a_exp, radix, format,INCL_RADIX);
     variable v_check_ok  : boolean := true;  -- as default prior to checking
+    variable v_trigger_alert : boolean := false; -- trigger alert and log message
+
+    -- Match length of short string with long string
+    function pad_short_string(short, long : string) return string is
+      variable v_padding : string(1 to (long'length - short'length)) := (others => '0');
+    begin
+      -- Include leading 'x"'
+      return short(1 to 2) & v_padding & short(3 to short'length);
+    end function pad_short_string;
+
   begin
     -- AS_IS format has been deprecated and will be removed in the near future
     if format = AS_IS then
       deprecate(get_procedure_name_from_instance_name(value'instance_name), "format 'AS_IS' has been deprecated. Use KEEP_LEADING_0.");
     end if;
 
-    v_check_ok := matching_values(a_value, a_exp);
+    v_check_ok := matching_values(a_value, a_exp, match_strictness);
 
     if v_check_ok then
       if v_value_str = v_exp_str then
@@ -2939,11 +3027,22 @@ package body methods_pkg is
           log(msg_id, caller_name & " => OK, for " & value_type & " " & v_value_str & "' (exp: " & v_exp_str & "'). " & add_msg_delimiter(msg),
               scope, msg_id_panel);
         else
-          alert(alert_level, caller_name & " => Failed. " & value_type & "  Was "  & v_value_str & "'. Expected " & v_exp_str & "'" & LF & msg, scope);
+          v_trigger_alert := true; -- alert and log
         end if;
       end if;
     else
-      alert(alert_level, caller_name & " => Failed. " & value_type & "  Was "  & v_value_str & "'. Expected " & v_exp_str & "'" & LF & msg, scope);
+      v_trigger_alert := true; -- alert and log
+    end if;
+
+    -- trigger alert and log message
+    if v_trigger_alert then
+      if v_value_str'length > v_exp_str'length then
+        alert(alert_level, caller_name & " => Failed. " & value_type & "  Was "  & v_value_str & ". Expected " & pad_short_string(v_exp_str,v_value_str) & "." & LF & msg, scope);
+      elsif v_value_str'length < v_exp_str'length then
+        alert(alert_level, caller_name & " => Failed. " & value_type & "  Was "  & pad_short_string(v_value_str,v_exp_str) & ". Expected " & v_exp_str & "." & LF & msg, scope);
+      else
+        alert(alert_level, caller_name & " => Failed. " & value_type & "  Was "  & v_value_str & ". Expected " & v_exp_str & "." & LF & msg, scope);
+      end if;
     end if;
 
     return v_check_ok;
@@ -2956,7 +3055,7 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -2979,7 +3078,7 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -2999,7 +3098,7 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -3109,7 +3208,7 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -3131,7 +3230,7 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -3153,7 +3252,7 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -3240,7 +3339,7 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -3258,7 +3357,7 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -3276,7 +3375,7 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -3294,7 +3393,7 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
@@ -3372,17 +3471,26 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
     constant value_type  : string          := "t_slv_array"
     ) is
-    variable v_check_ok  : boolean;
+    variable v_check_ok     : boolean;
+    variable v_len_check_ok : boolean := (value'length = exp'length);
+    variable v_dir_check_ok : boolean := (value'ascending = exp'ascending);
+    -- adjust for array index differences
+    variable v_adj_idx      : integer := (value'low - exp'low);
   begin
-    for idx in exp'range loop
-      v_check_ok := check_value(value(idx), exp(idx), alert_level, msg, scope, radix, format, msg_id, msg_id_panel, caller_name, value_type);
-    end loop;
+    check_value(v_dir_check_ok = true, warning, "array directions do not match", scope);
+    check_value(v_len_check_ok = true, warning, "array lengths do not match", scope);
+
+    if v_len_check_ok and v_dir_check_ok then
+      for idx in exp'range loop
+        v_check_ok := check_value(value(idx + v_adj_idx), exp(idx), alert_level, msg, scope, radix, format, msg_id, msg_id_panel, caller_name, value_type);
+      end loop;
+    end if;
   end;
 
   procedure check_value(
@@ -3392,17 +3500,26 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
     constant value_type  : string          := "t_signed_array"
     ) is
-    variable v_check_ok  : boolean;
+    variable v_check_ok     : boolean;
+    variable v_len_check_ok : boolean := (value'length = exp'length);
+    variable v_dir_check_ok : boolean := (value'ascending = exp'ascending);
+    -- adjust for array index differences
+    variable v_adj_idx      : integer := (value'low - exp'low);
   begin
-    for idx in exp'range loop
-      v_check_ok := check_value(std_logic_vector(value(idx)), std_logic_vector(exp(idx)), alert_level, msg, scope, radix, format, msg_id, msg_id_panel, caller_name, value_type);
-    end loop;
+    check_value(v_dir_check_ok = true, warning, "array directions do not match", scope);
+    check_value(v_len_check_ok = true, warning, "array lengths do not match", scope);
+
+    if v_len_check_ok and v_dir_check_ok then
+      for idx in exp'range loop
+        v_check_ok := check_value(std_logic_vector(value(idx + v_adj_idx)), std_logic_vector(exp(idx)), alert_level, msg, scope, radix, format, msg_id, msg_id_panel, caller_name, value_type);
+      end loop;
+    end if;
   end;
 
   procedure check_value(
@@ -3412,17 +3529,26 @@ package body methods_pkg is
     constant msg         : string;
     constant scope       : string          := C_TB_SCOPE_DEFAULT;
     constant radix       : t_radix         := HEX_BIN_IF_INVALID;
-    constant format      : t_format_zeros  := SKIP_LEADING_0;
+    constant format      : t_format_zeros  := KEEP_LEADING_0;
     constant msg_id      : t_msg_id        := ID_POS_ACK;
     constant msg_id_panel: t_msg_id_panel  := shared_msg_id_panel;
     constant caller_name : string          := "check_value()";
     constant value_type  : string          := "t_unsigned_array"
     ) is
-    variable v_check_ok  : boolean;
+    variable v_check_ok     : boolean;
+    variable v_len_check_ok : boolean := (value'length = exp'length);
+    variable v_dir_check_ok : boolean := (value'ascending = exp'ascending);
+    -- adjust for array index differences
+    variable v_adj_idx      : integer := (value'low - exp'low);
   begin
-    for idx in exp'range loop
-      v_check_ok := check_value(std_logic_vector(value(idx)), std_logic_vector(exp(idx)), alert_level, msg, scope, radix, format, msg_id, msg_id_panel, caller_name, value_type);
-    end loop;
+    check_value(v_dir_check_ok = true, warning, "array directions do not match", scope);
+    check_value(v_len_check_ok = true, warning, "array lengths do not match", scope);
+
+    if v_len_check_ok and v_dir_check_ok then
+      for idx in exp'range loop
+        v_check_ok := check_value(std_logic_vector(value(idx + v_adj_idx)), std_logic_vector(exp(idx)), alert_level, msg, scope, radix, format, msg_id, msg_id_panel, caller_name, value_type);
+      end loop;
+    end if;
   end;
 
   ------------------------------------------------------------------------
@@ -4074,25 +4200,46 @@ package body methods_pkg is
     constant ascending        : boolean           := false;
     constant byte_endianness  : t_byte_endianness := FIRST_BYTE_LEFT
   ) return t_byte_array is
-    variable v_bytes_in_word      : integer := (slv_array(0)'length/8);
+    variable v_bytes_in_word      : integer := (slv_array(slv_array'low)'length/8);
     variable v_byte_array_length  : integer := (slv_array'length * v_bytes_in_word);
     variable v_ascending_array    : t_byte_array(0 to v_byte_array_length-1);
     variable v_descending_array   : t_byte_array(v_byte_array_length-1 downto 0);
+    variable v_ascending_vector   : boolean := false;
     variable v_byte_number        : integer := 0;
+    variable v_offset             : natural := 0;
   begin
+    -- The ascending parameter should match the array direction. We could also just remove the ascending
+    -- parameter and use the t'ascending attribute.
+    bitvis_assert((slv_array'ascending and ascending) or (not(slv_array'ascending) and not(ascending)), ERROR,
+      "convert_slv_array_to_byte_array()", "slv_array direction doesn't match ascending parameter");
+
+    v_ascending_vector := slv_array(slv_array'low)'ascending;
+    -- Use this offset in case the slv_array doesn't start at 0
+    v_offset := slv_array'low;
+
     if byte_endianness = FIRST_BYTE_LEFT then
       for slv_idx in 0 to slv_array'length-1 loop
         for byte in v_bytes_in_word downto 1 loop
-          v_ascending_array(v_byte_number) := slv_array(slv_idx)((8*byte)-1 downto (byte-1)*8);
-          v_descending_array(v_byte_number) := slv_array(slv_idx)((8*byte)-1 downto (byte-1)*8);
+          if v_ascending_vector then
+            v_ascending_array(v_byte_number) := slv_array(slv_idx+v_offset)((byte-1)*8 to (8*byte)-1);
+            v_descending_array(v_byte_number) := slv_array(slv_idx+v_offset)((byte-1)*8 to (8*byte)-1);
+          else -- SLV vector is descending
+            v_ascending_array(v_byte_number) := slv_array(slv_idx+v_offset)((8*byte)-1 downto (byte-1)*8);
+            v_descending_array(v_byte_number) := slv_array(slv_idx+v_offset)((8*byte)-1 downto (byte-1)*8);
+          end if;
           v_byte_number := v_byte_number + 1;
         end loop;
       end loop;
     else -- FIRST_BYTE_RIGHT
       for slv_idx in 0 to slv_array'length-1 loop
         for byte in 1 to v_bytes_in_word loop
-          v_ascending_array(v_byte_number) := slv_array(slv_idx)((8*byte)-1 downto (byte-1)*8);
-          v_descending_array(v_byte_number) := slv_array(slv_idx)((8*byte)-1 downto (byte-1)*8);
+          if v_ascending_vector then
+            v_ascending_array(v_byte_number) := slv_array(slv_idx+v_offset)((byte-1)*8 to (8*byte)-1);
+            v_descending_array(v_byte_number) := slv_array(slv_idx+v_offset)((byte-1)*8 to (8*byte)-1);
+          else -- SLV vector is descending
+            v_ascending_array(v_byte_number) := slv_array(slv_idx+v_offset)((8*byte)-1 downto (byte-1)*8);
+            v_descending_array(v_byte_number) := slv_array(slv_idx+v_offset)((8*byte)-1 downto (byte-1)*8);
+          end if;
           v_byte_number := v_byte_number + 1;
         end loop;
       end loop;
@@ -5830,48 +5977,96 @@ package body methods_pkg is
 
 
 
--- ============================================================================
--- Synchronisation methods
--- ============================================================================
-  procedure block_flag(
-    constant flag_name : in string;
-    constant msg : in string
-  ) is
+  -- ============================================================================
+  -- Synchronization methods
+  -- ============================================================================
+  -- Local type used in synchronization methods
+  type t_flag_array_idx_and_status_record is record
+    flag_idx        : integer;
+    flag_is_new     : boolean;
+    flag_array_full : boolean;
+  end record;
+
+  -- Local function used in synchronization methods to search through shared_flag_array for flag_name or available index
+  -- Returns:
+  --          Flag index in the shared array
+  --          If the flag is new or already in the array
+  --          If the array is full, and the flag can not be added (alerts an error).
+  impure function find_or_add_sync_flag(
+    constant flag_name          : string
+    ) return t_flag_array_idx_and_status_record is
+    variable v_idx              : integer := 0;
+    variable v_is_new           : boolean := false;
+    variable v_is_array_full    : boolean := true;
   begin
-    -- Block the flag if it was used before
     for i in shared_flag_array'range loop
-      if shared_flag_array(i).flag_name(flag_name'range) = flag_name or shared_flag_array(i).flag_name = (shared_flag_array(i).flag_name'range => ' ') then
+      -- Search for empty index. If found add a new flag
+      if (shared_flag_array(i).flag_name = (shared_flag_array(i).flag_name'range => NUL)) then
         shared_flag_array(i).flag_name(flag_name'range) := flag_name;
-        shared_flag_array(i).is_active := true;
+        v_is_new := true;
+      end if;
+      -- Check if flag exists in the array
+      if (shared_flag_array(i).flag_name(flag_name'range) = flag_name) then
+        v_idx := i;
+        v_is_array_full := false;
         exit;
       end if;
     end loop;
+    return (v_idx, v_is_new, v_is_array_full);
+  end;
 
-    log(ID_BLOCKING, "Blocking " & flag_name & ". " & add_msg_delimiter(msg), C_SCOPE);
+  procedure block_flag(
+    constant flag_name                : in string;
+    constant msg                      : in string;
+    constant already_blocked_severity : in t_alert_level := WARNING;
+    constant scope                    : in string := C_TB_SCOPE_DEFAULT
+  ) is
+    variable v_idx            : integer := 0;
+    variable v_is_new         : boolean := false;
+    variable v_is_array_full  : boolean := true;
+  begin
+    -- Find flag, or add a new provided the array is not full.
+    (v_idx, v_is_new, v_is_array_full) := find_or_add_sync_flag(flag_name);
+    if (v_is_array_full = true) then
+      alert(TB_ERROR, "The flag " & flag_name & " was not found and the maximum number of flags (" & to_string(C_NUM_SYNC_FLAGS) & ") have been used. Configure in adaptations_pkg. " & add_msg_delimiter(msg), scope);
+    else -- Block flag
+      if (v_is_new = true) then
+        log(ID_BLOCKING, flag_name & ": New blocked synchronization flag added. " & add_msg_delimiter(msg), scope);
+      else
+        -- Check if the flag to be blocked already is blocked
+        if (shared_flag_array(v_idx).is_blocked = true) then
+          alert(already_blocked_severity, "The flag " & flag_name & " was already blocked. " & add_msg_delimiter(msg), scope);
+        else
+          log(ID_BLOCKING, flag_name & ": Blocking flag. " & add_msg_delimiter(msg), scope);
+        end if;
+      end if;
+      shared_flag_array(v_idx).is_blocked := true;
+    end if;
   end procedure;
 
   procedure unblock_flag(
-    constant flag_name : in string;
-    constant msg       : in string;
-    signal   trigger   : inout std_logic
+    constant flag_name    : in string;
+    constant msg          : in string;
+    signal   trigger      : inout std_logic; -- Parameter must be global_trigger as method await_unblock_flag() uses that global signal to detect unblocking.
+    constant scope        : in string := C_TB_SCOPE_DEFAULT
   ) is
-    variable found : boolean := false;
+    variable v_idx            : integer := 0;
+    variable v_is_new         : boolean := false;
+    variable v_is_array_full  : boolean := true;
   begin
-    -- check if the flag has already been added. If not add it.
-    for i in shared_flag_array'range loop
-      if shared_flag_array(i).flag_name(flag_name'range) = flag_name or shared_flag_array(i).flag_name = (shared_flag_array(i).flag_name'range => ' ') then
-        shared_flag_array(i).flag_name(flag_name'range) := flag_name;
-        shared_flag_array(i).is_active := false;
-        found := true;
-        log(ID_BLOCKING, "Unblocking " & flag_name & ". " & add_msg_delimiter(msg), C_SCOPE);
-
-        gen_pulse(trigger, 0 ns, "pulsing global_trigger. " & add_msg_delimiter(msg), C_TB_SCOPE_DEFAULT, ID_NEVER);
-        exit;
+    -- Find flag, or add a new provided the array is not full.
+    (v_idx, v_is_new, v_is_array_full) := find_or_add_sync_flag(flag_name);
+    if (v_is_array_full = true) then
+      alert(TB_ERROR, "The flag " & flag_name & " was not found and the maximum number of flags (" & to_string(C_NUM_SYNC_FLAGS) & ") have been used. Configure in adaptations_pkg. " & add_msg_delimiter(msg), scope);
+    else -- Unblock flag
+      if (v_is_new = true) then
+        log(ID_BLOCKING, flag_name & ": New unblocked synchronization flag added. " & add_msg_delimiter(msg), scope);
+      else
+        log(ID_BLOCKING, flag_name & ": Unblocking flag. " & add_msg_delimiter(msg), scope);
       end if;
-    end loop;
-
-    if found = false then
-      log(ID_BLOCKING, "The flag " & flag_name & " was not found and the maximum of flags were used. Configure in adaptations_pkg. " & add_msg_delimiter(msg), C_SCOPE);
+      shared_flag_array(v_idx).is_blocked := false;
+      -- Triggers a signal to allow await_unblock_flag() to detect unblocking.
+      gen_pulse(trigger, 0 ns, "pulsing global_trigger. " & add_msg_delimiter(msg), C_TB_SCOPE_DEFAULT, ID_NEVER);
     end if;
   end procedure;
 
@@ -5880,74 +6075,78 @@ package body methods_pkg is
     constant timeout          : in time;
     constant msg              : in string;
     constant flag_returning   : in t_flag_returning := KEEP_UNBLOCKED;
-    constant timeout_severity : in t_alert_level := ERROR
+    constant timeout_severity : in t_alert_level := ERROR;
+    constant scope            : in string := C_TB_SCOPE_DEFAULT
   ) is
-    variable v_flag_is_active    : boolean := true;
-    constant start_time          : time := now;
+    variable v_idx              : integer := 0;
+    variable v_is_new           : boolean := false;
+    variable v_is_array_full    : boolean := true;
+    variable v_flag_is_blocked  : boolean := true;
+    constant start_time         : time := now;
+
   begin
-    -- check if flag was not unblocked before
-    for i in shared_flag_array'range loop
-      -- check if the flag was already in the global_flag array. If it was not -> add it to the first free space
-      if shared_flag_array(i).flag_name(flag_name'range) = flag_name or shared_flag_array(i).flag_name = (shared_flag_array(i).flag_name'range => ' ') then
-        shared_flag_array(i).flag_name(flag_name'range) := flag_name;
-        v_flag_is_active := shared_flag_array(i).is_active;
-        if v_flag_is_active = false then
-          log(ID_BLOCKING, flag_name & " was not blocked. " & add_msg_delimiter(msg), C_SCOPE);
-          if flag_returning = RETURN_TO_BLOCK then
+    -- Find flag, or add a new provided the array is not full.
+    (v_idx, v_is_new, v_is_array_full) := find_or_add_sync_flag(flag_name);
+    if (v_is_array_full = true) then
+      alert(TB_ERROR, "The flag " & flag_name & " was not found and the maximum number of flags (" & to_string(C_NUM_SYNC_FLAGS) & ") have been used. Configure in adaptations_pkg. " & add_msg_delimiter(msg), scope);
+    else -- Waits only if the flag is found and is blocked. Will wait when a new flag is added, as it is default blocked.
+      v_flag_is_blocked := shared_flag_array(v_idx).is_blocked;
+      if (v_flag_is_blocked = false) then
+        if (flag_returning = RETURN_TO_BLOCK) then
+          -- wait for all sequencer that are waiting for that flag before reseting it
+          wait for 0 ns;
+          shared_flag_array(v_idx).is_blocked := true;
+          log(ID_BLOCKING, flag_name & ": Was already unblocked. Returned to blocked. " & add_msg_delimiter(msg), scope);
+        else
+          log(ID_BLOCKING, flag_name & ": Was already unblocked. " & add_msg_delimiter(msg), scope);
+        end if;
+      else -- Flag is blocked (or a new flag was added), starts waiting. log before while loop. Otherwise the message will be printed everytime the global_trigger was triggered.
+        if (v_is_new = true) then
+          log(ID_BLOCKING, flag_name & ": New blocked synchronization flag added. Waiting to be unblocked. " & add_msg_delimiter(msg), scope);
+        else
+          log(ID_BLOCKING, flag_name & ": Waiting to be unblocked. " & add_msg_delimiter(msg), scope);
+        end if;
+      end if;
+
+      -- Waiting for flag to be unblocked
+      while v_flag_is_blocked = true loop
+        if (timeout /= 0 ns) then
+          wait until rising_edge(global_trigger) for ((start_time + timeout) - now);
+          check_value(global_trigger = '1', timeout_severity, flag_name & " timed out. " & add_msg_delimiter(msg), scope, ID_NEVER);
+          if global_trigger /= '1' then
+            exit;
+          end if;
+        else
+          wait until rising_edge(global_trigger);
+        end if;
+
+        v_flag_is_blocked := shared_flag_array(v_idx).is_blocked;
+        if (v_flag_is_blocked = false) then
+          if flag_returning = KEEP_UNBLOCKED then
+            log(ID_BLOCKING, flag_name & ": Has been unblocked. ", scope);
+          else
+            log(ID_BLOCKING, flag_name & ": Has been unblocked. Returned to blocked. ", scope);
             -- wait for all sequencer that are waiting for that flag before reseting it
             wait for 0 ns;
-            shared_flag_array(i).is_active := true;
+            shared_flag_array(v_idx).is_blocked := true;
           end if;
         end if;
-        exit;
-      end if;
-    end loop;
 
-    if v_flag_is_active = true then
-      -- log before while loop. Otherwise the message will be printed everytime the global_trigger was triggered.
-      log(ID_BLOCKING, "Waiting for " & flag_name & " to be unblocked. " & add_msg_delimiter(msg), C_SCOPE);
-    end if;
-
-    while v_flag_is_active = true loop
-      if timeout /= 0 ns then
-        wait until rising_edge(global_trigger) for ((start_time + timeout) - now);
-        check_value(global_trigger = '1', timeout_severity, flag_name & " timed out" & add_msg_delimiter(msg), C_SCOPE, ID_NEVER);
-        if global_trigger /= '1' then
-          exit;
-        end if;
-      else
-        wait until rising_edge(global_trigger);
-      end if;
-
-      for i in shared_flag_array'range loop
-        if shared_flag_array(i).flag_name(flag_name'range) = flag_name then
-
-          v_flag_is_active := shared_flag_array(i).is_active;
-          if v_flag_is_active = false then
-            log(ID_BLOCKING, flag_name & " was unblocked. " & add_msg_delimiter(msg), C_SCOPE);
-            if flag_returning = RETURN_TO_BLOCK then
-              -- wait for all sequencer that are waiting for that flag before reseting it
-              wait for 0 ns;
-              shared_flag_array(i).is_active := true;
-            end if;
-          end if;
-        end if;
       end loop;
-
-    end loop;
-
+    end if;
   end procedure;
 
   procedure await_barrier(
     signal   barrier_signal   : inout std_logic;
     constant timeout          : in time;
     constant msg              : in string;
-    constant timeout_severity : in t_alert_level := ERROR
+    constant timeout_severity : in t_alert_level := ERROR;
+    constant scope            : in string := C_TB_SCOPE_DEFAULT
   )is
   begin
     -- set barrier signal to 0
     barrier_signal <= '0';
-    log(ID_BLOCKING, "Waiting for barrier. " & add_msg_delimiter(msg), C_SCOPE);
+    log(ID_BLOCKING, "Waiting for barrier. " & add_msg_delimiter(msg), scope);
     -- wait until all sequencer using that barrier_signal wait for it
     if timeout = 0 ns then
       wait until barrier_signal = '0';
@@ -5956,9 +6155,9 @@ package body methods_pkg is
     end if;
     if barrier_signal /= '0' then
       -- timeout
-      alert(timeout_severity, "Timeout while waiting for barrier signal. " & add_msg_delimiter(msg), C_SCOPE);
+      alert(timeout_severity, "Timeout while waiting for barrier signal. " & add_msg_delimiter(msg), scope);
     else
-      log(ID_BLOCKING, "Barrier received. " & add_msg_delimiter(msg), C_SCOPE);
+      log(ID_BLOCKING, "Barrier received. " & add_msg_delimiter(msg), scope);
     end if;
     barrier_signal <= '1';
   end procedure;

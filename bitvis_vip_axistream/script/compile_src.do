@@ -1,5 +1,5 @@
 #========================================================================================================================
-# Copyright (c) 2017 by Bitvis AS.  All rights reserved.
+# Copyright (c) 2019 by Bitvis AS.  All rights reserved.
 # You should have received a copy of the license file containing the MIT License (see LICENSE.TXT), if not,
 # contact Bitvis AS <support@bitvis.no>.
 #
@@ -10,8 +10,13 @@
 # OTHER DEALINGS IN UVVM.
 #========================================================================================================================
 
-# This file may be called with an argument
-# arg 1: Part directory of this library/module
+#-----------------------------------------------------------------------
+# This file may be called with 0 to 2 arguments:
+#
+#   0 args: regular UVVM directory structure expected
+#   1 args: source directory specified, target will be current directory
+#   2 args: source directory and target directory specified
+#-----------------------------------------------------------------------
 
 # Overload quietly (Modelsim specific command) to let it work in Riviera-Pro
 proc quietly { args } {
@@ -23,110 +28,27 @@ proc quietly { args } {
   }
 }
 
-if {[batch_mode]} {
-  onerror {abort all; exit -f -code 1}
-} else {
-  onerror {abort all}
-}
-
-# Detect simulator
-if {[catch {eval "vsim -version"} message] == 0} {
-  quietly set simulator_version [eval "vsim -version"]
-  # puts "Version is: $simulator_version"
-  if {[regexp -nocase {modelsim} $simulator_version]} {
-    quietly set simulator "modelsim"
-  } elseif {[regexp -nocase {aldec} $simulator_version]} {
-    quietly set simulator "rivierapro"
-  } else {
-    puts "Unknown simulator. Attempting to use Modelsim commands."
-    quietly set simulator "modelsim"
-  }
-} else {
-    puts "vsim -version failed with the following message:\n $message"
-    abort all
-}
-
-if { [string equal -nocase $simulator "modelsim"] } {
-  ###########
-  # Fix possible vmap bug
-  do fix_vmap.tcl
-  ##########
-}
-
-
-#
-# Set up vip_axistream_part_path and default_library
-#------------------------------------------------------
-quietly set part_name "bitvis_vip_axistream"
-# path from mpf-file in sim
-quietly set vip_axistream_part_path "../..//$part_name"
-
-# argument number 1 - user specified input directory
+#-----------------------------------------------------------------------
+# Set up source_path and target_path
+#-----------------------------------------------------------------------
 if { [info exists 1] } {
-  # path from this part to target part
-  quietly set vip_axistream_part_path "$1/..//$part_name"
+  quietly set source_path "$1"
+
+  if {$argc == 1} {
+    echo "\nUser specified source directory"
+    quietly set target_path "$source_path/sim"
+  } elseif {$argc >= 2} {
+    echo "\nUser specified source and target directory"
+    quietly set target_path "$2"
+  }
   unset 1
-}
-# argument number 2 - user speficied output directory
-if {$argc >= 2} {
-  echo "\nUser specified output directory"
-  quietly set destination_path "$2"
-  quietly set default_library 0
 } else {
   echo "\nDefault output directory"
-  quietly set destination_path vip_axistream_part_path
-  quietly set default_library 1
+  quietly set source_path ".."
+  quietly set target_path "$source_path/sim"
 }
 
-
-#
-# Read compile_order.txt and set lib_name
-#--------------------------------------------------
-quietly set fp [open "$vip_axistream_part_path/script/compile_order.txt" r]
-quietly set file_data [read $fp]
-quietly set lib_name [lindex $file_data 2]
-close $fp
-
-#
-# (Re-)Generate library and Compile source files
-#--------------------------------------------------
-echo "\n\nRe-gen lib and compile $lib_name source"
-if {$default_library} {
-  if {[file exists $vip_axistream_part_path/sim/$lib_name]} {
-    file delete -force $vip_axistream_part_path/sim/$lib_name
-  }
-  if {![file exists $vip_axistream_part_path/sim]} {
-    file mkdir $vip_axistream_part_path/sim
-  }
-} else {
-  if {![file exists $destination_path/$lib_name]} {
-    file mkdir $destination_path/$lib_name
-  }
-}
-
-if {$default_library} {
-  vlib $vip_axistream_part_path/sim/$lib_name
-  vmap $lib_name $vip_axistream_part_path/sim/$lib_name
-} else {
-  vlib $destination_path/$lib_name
-  vmap $lib_name $destination_path/$lib_name
-}
-
-if { [string equal -nocase $simulator "modelsim"] } {
-  quietly set compdirectives "-quiet -suppress 1346,1236 -2008 -work $lib_name"
-} elseif { [string equal -nocase $simulator "rivierapro"] } {
-  set compdirectives "-2008 -nowarn COMP96_0564 -nowarn COMP96_0048 -dbg -work $lib_name"
-}
-
-#
-# Compile src files
-#--------------------------------------------------
-echo "\n\n\n=== Compiling $lib_name source\n"
-quietly set idx 0
-foreach item $file_data {
-  if {$idx > 2} {
-    echo "eval vcom  $compdirectives  $vip_axistream_part_path/sim/$item"
-    eval vcom  $compdirectives  $vip_axistream_part_path/sim/$item
-  }
-  incr idx 1
-}
+#-----------------------------------------------------------------------
+# Call top-level compile script with local library arguments
+#-----------------------------------------------------------------------
+do $source_path/../script/compile_src.do $source_path $target_path

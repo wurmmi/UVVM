@@ -3,6 +3,68 @@ UVVM Utility Library - Overview on Versions and Changes
 
 ----------------------------------------------------------------------
 
+v2.9.0
+----------
+Released: 2019-09-02
+- Bug fix for std.env.stop return value when UVVM stop simulations if stop-limit is
+  reached for a given alert.
+
+
+v2.8.0
+----------
+Released: 2019-06-06
+- Changes to synchronization flag methods with local record and function.
+  Added scope and already_blocked_severity as optional inputs.
+- Moved C_NUM_SYNC_FLAGS to adaptation_pkg. t_sync_flag_record_array and
+  shared_flag_array was modified to match this.
+- Fixed fatal error in convert_slv_array_to_byte when using ascending std_logic_vector.
+- Removed extra spaces in log reports.
+- Added optional scope to all CDMs.
+- Updated documentation.
+- Added support for several backslash-r in log method.
+- Added scope to enable_log_msg and disable_log_msg.
+- Added ascending slv support to convert_slv_array_to_byte_array function.
+
+
+v2.7.0
+----------
+Released: 2018-12-03
+- Updated documentation
+- Check value with std_logic/std_logic_vector now have option, MATCH_STD_INCL_Z,
+  that also includes match of 'Z'.
+
+
+v2.6.0
+----------
+Released: 2018-08-30
+- Updated documentation
+- Compile script changed according to new structure
+- Fixed simulation status in shared_uvvm_status and hierarchical alert messages
+- New package for global signals and shared variables added, global_signals_and_shared_variables_pkg.vhd.
+
+
+v2.5.0
+----------
+Released: 2018-07-02
+- Added message id ID_DATA and ID_CTRL.
+- Added constants ALL_ENABLED_INTSTANCES, C_MAX_QUEUE_INSTANCE_NUM,
+  C_SB_TAG_WIDTH, C_SB_SOURCE_WIDTH, C_SB_SLV_WIDTH.
+- Added types positve_vector and natural_vector.
+- Added types t_identifier_option, t_range_option, t_tag_usage and t_void_bfm_config.
+
+
+v2.4.0
+----------
+Released: 2018-04-09
+- Changed to KEEP_LEADING_0 in check_value() for SLV, signed and unsigned.
+- Added t_info_on_finishing_await_any_completion with VVC name, index and
+  time of competion to t_shared_uvvm_status.
+- Added increment_expected_alerts_and_stop_limit()
+- Made ID_LOG_MSG_CTRL always visible in the transcript window.
+- Added padding of leading zeros to check_values() with SLVs of different
+  lengths.
+
+
 v2.3.1
 ----------
 Released: 2017-12-20

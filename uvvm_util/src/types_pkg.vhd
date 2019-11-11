@@ -28,7 +28,6 @@ package types_pkg is
   file LOG_FILE : text;
 
   constant C_LOG_HDR_FOR_WAVEVIEW_WIDTH : natural := 100; -- For string in waveview indicating last log header
-  constant C_NUM_SYNC_FLAGS     : positive := 10;
   constant C_FLAG_NAME_LENGTH   : positive := 20;
 
   type t_void is (VOID);
@@ -40,6 +39,9 @@ package types_pkg is
   type t_signed_array   is array (natural range <>) of signed;
   type t_unsigned_array is array (natural range <>) of unsigned;
 
+  -- Additions to predefined vector types
+  type natural_vector  is array (natural range <>) of natural;
+  type positive_vector is array (natural range <>) of positive;
 
   -- Note: Most types below have a matching to_string() in 'string_methods_pkg.vhd'
 
@@ -65,7 +67,7 @@ package types_pkg is
 
   type t_log_destination is (CONSOLE_AND_LOG, CONSOLE_ONLY, LOG_ONLY);
 
-  type t_match_strictness is (MATCH_STD, MATCH_EXACT);
+  type t_match_strictness is (MATCH_STD, MATCH_STD_INCL_Z, MATCH_EXACT);
 
   type t_alert_counters  is array (NOTE to t_alert_level'right) of natural;
   type t_alert_attention is array (NOTE to t_alert_level'right) of t_attention;
@@ -102,22 +104,46 @@ package types_pkg is
   type t_flag_returning is (KEEP_UNBLOCKED, RETURN_TO_BLOCK); -- value after unblock
 
   type t_sync_flag_record is record
-    flag_name  : string(1 to C_FLAG_NAME_LENGTH);
-    is_active  : boolean;
+    flag_name   : string(1 to C_FLAG_NAME_LENGTH);
+    is_blocked  : boolean;
   end record;
 
   constant C_SYNC_FLAG_DEFAULT : t_sync_flag_record := (
-    flag_name  => (others => ' '),
-    is_active  => true
+    flag_name   => (others => NUL),
+    is_blocked  => true
   );
-  type t_sync_flag_record_array is array (1 to C_NUM_SYNC_FLAGS) of t_sync_flag_record;
+  
+  type t_sync_flag_record_array is array (natural range <>) of t_sync_flag_record;
 
+
+  -- type for identifying VVC and command index finishing await_any_completion()
+  type t_info_on_finishing_await_any_completion is record
+    vvc_name                : string(1 to 100); -- VVC name should not exceed this length
+    vvc_cmd_idx             : natural;          -- VVC command index
+    vvc_time_of_completion  : time;             -- time of completion
+  end record;
 
   type t_uvvm_status is record
-    no_unexpected_simulation_warnings_or_worse  : natural range 0 to 1;
-    no_unexpected_simulation_errors_or_worse    : natural range 0 to 1;
+    found_unexpected_simulation_warnings_or_worse     : natural range 0 to 1; -- simulation end status: 0=no unexpected, 1=unexpected
+    found_unexpected_simulation_errors_or_worse       : natural range 0 to 1; -- simulation end status: 0=no unexpected, 1=unexpected
+    mismatch_on_expected_simulation_warnings_or_worse : natural range 0 to 1; -- simulation status: 0=no mismatch, 1=mismatch
+    mismatch_on_expected_simulation_errors_or_worse   : natural range 0 to 1; -- simulation status: 0=no mismatch, 1=mismatch
+    info_on_finishing_await_any_completion            : t_info_on_finishing_await_any_completion; -- await_any_completion() trigger identifyer
   end record t_uvvm_status;
 
+  -- defaults for t_uvvm_status and t_info_on_finishing_await_any_completion
+  constant C_INFO_ON_FINISHING_AWAIT_ANY_COMPLETION_VVC_NAME_DEFAULT : string := "no await_any_completion() finshed yet\n";
+  constant C_UVVM_STATUS_DEFAULT : t_uvvm_status := (
+    found_unexpected_simulation_warnings_or_worse     => 0,
+    found_unexpected_simulation_errors_or_worse       => 0,
+    mismatch_on_expected_simulation_warnings_or_worse => 0,
+    mismatch_on_expected_simulation_errors_or_worse   => 0,
+    info_on_finishing_await_any_completion            => (vvc_name    => (C_INFO_ON_FINISHING_AWAIT_ANY_COMPLETION_VVC_NAME_DEFAULT, others => ' '),
+                                                          vvc_cmd_idx => 0,
+                                                          vvc_time_of_completion => 0 ns)
+  );
+
+  type t_justify_center is (center);
 
   -------------------------------------
   -- BFMs and above
@@ -144,6 +170,23 @@ package types_pkg is
     inter_bfm_delay_violation_severity  : t_alert_level;
   end record;
 
+  type t_void_bfm_config is (VOID);
+  constant C_VOID_BFM_CONFIG : t_void_bfm_config := VOID;
+
+  -------------------------------------
+  -- SB
+  -------------------------------------
+  -- Identifier_option: Typically describes what the next parameter means.
+  -- - ENTRY_NUM :
+  --     Incremented for each entry added to the queue.
+  --     Unlike POSITION, the ENTRY_NUMBER will stay the same for this entry, even if entries are inserted before this entry
+  -- - POSITION :
+  --     Position of entry in queue, independent of when the entry was inserted.
+  type t_identifier_option is (ENTRY_NUM, POSITION);
+
+  type t_range_option is (SINGLE, AND_LOWER, AND_HIGHER);
+
+  type t_tag_usage is (TAG, NO_TAG);
 
 end package types_pkg;
 

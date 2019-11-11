@@ -106,12 +106,22 @@ package td_vvc_entity_support_pkg is
     constant vvc_config        : in t_vvc_config;
     signal VVCT                : in t_vvc_target_record;
     signal VVC_BROADCAST       : inout std_logic;
-    signal global_vvc_busy : inout std_logic;
+    signal global_vvc_busy     : inout std_logic;
+    signal vvc_ack             : out std_logic;
+    variable output_vvc_cmd    : out t_vvc_cmd_record
+    );
+
+  -- DEPRECATED
+  procedure await_cmd_from_sequencer(
+    constant vvc_labels        : in t_vvc_labels;
+    constant vvc_config        : in t_vvc_config;
+    signal VVCT                : in t_vvc_target_record;
+    signal VVC_BROADCAST       : inout std_logic;
+    signal global_vvc_busy     : inout std_logic;
     signal vvc_ack             : out std_logic;
     constant shared_vvc_cmd    : in t_vvc_cmd_record;
     variable output_vvc_cmd    : out t_vvc_cmd_record
     );
-
 
   -------------------------------------------
   -- put_command_on_queue
@@ -192,7 +202,8 @@ package td_vvc_entity_support_pkg is
     constant command              : in t_vvc_cmd_record;
     constant vvc_config           : in t_vvc_config;
     constant vvc_labels           : in t_vvc_labels;
-    signal terminate_current_cmd  : inout t_flag_record
+    signal terminate_current_cmd  : inout t_flag_record;
+    constant executor_is_busy     : in boolean := true
     );
 
 
@@ -283,7 +294,8 @@ package td_vvc_entity_support_pkg is
 
 
   procedure populate_shared_vvc_cmd_with_broadcast (
-    variable output_vvc_cmd   : out t_vvc_cmd_record
+    variable output_vvc_cmd   : out t_vvc_cmd_record;
+    constant scope            : in  string := C_SCOPE
   );
 
 end package td_vvc_entity_support_pkg;
@@ -429,14 +441,13 @@ package body td_vvc_entity_support_pkg is
   end function;
 
   procedure populate_shared_vvc_cmd_with_broadcast (
-    variable output_vvc_cmd   : out t_vvc_cmd_record
+    variable output_vvc_cmd   : out t_vvc_cmd_record;
+    constant scope            : in  string := C_SCOPE
   ) is
   begin
 
-    -- Increment the shared command index. This is normally done in the CDM, but for broadcast commands it is done by the VVC itself.
     check_value((shared_uvvm_state /= IDLE), TB_FAILURE, "UVVM will not work without uvvm_vvc_framework.ti_uvvm_engine instantiated in the test harness", C_SCOPE, ID_NEVER);
     await_semaphore_in_delta_cycles(protected_broadcast_semaphore);
-    shared_cmd_idx := shared_cmd_idx + 1;
 
     -- Populate the shared VVC command record
     output_vvc_cmd.operation    := broadcast_cmd_to_shared_cmd(shared_vvc_broadcast_cmd.operation);
@@ -451,11 +462,11 @@ package body td_vvc_entity_support_pkg is
     output_vvc_cmd.command_type := get_command_type_from_operation(shared_vvc_broadcast_cmd.operation);
 
     if global_show_msg_for_uvvm_cmd then
-      log(ID_UVVM_SEND_CMD, to_string(shared_vvc_cmd.proc_call) & ": " & add_msg_delimiter(to_string(shared_vvc_cmd.msg)) & "."
-          & format_command_idx(shared_cmd_idx), C_SCOPE);
+      log(ID_UVVM_SEND_CMD, to_string(shared_vvc_broadcast_cmd.proc_call) & ": " & add_msg_delimiter(to_string(shared_vvc_broadcast_cmd.msg))
+          & format_command_idx(shared_cmd_idx), scope);
     else
-      log(ID_UVVM_SEND_CMD, to_string(shared_vvc_cmd.proc_call)
-          & format_command_idx(shared_cmd_idx), C_SCOPE);
+      log(ID_UVVM_SEND_CMD, to_string(shared_vvc_broadcast_cmd.proc_call)
+          & format_command_idx(shared_cmd_idx), scope);
     end if;
     release_semaphore(protected_broadcast_semaphore);
 
@@ -466,9 +477,8 @@ package body td_vvc_entity_support_pkg is
     constant vvc_config        : in t_vvc_config;
     signal VVCT                : in t_vvc_target_record;
     signal VVC_BROADCAST       : inout std_logic;
-    signal global_vvc_busy : inout std_logic;
+    signal global_vvc_busy     : inout std_logic;
     signal vvc_ack             : out std_logic;
-    constant shared_vvc_cmd    : in t_vvc_cmd_record;
     variable output_vvc_cmd    : out t_vvc_cmd_record
     ) is
     variable v_was_broadcast : boolean := false;
@@ -484,7 +494,7 @@ package body td_vvc_entity_support_pkg is
       if VVC_BROADCAST'event and VVC_BROADCAST = '1' then
         v_was_broadcast := true;
         VVC_BROADCAST <= '1';
-        populate_shared_vvc_cmd_with_broadcast(output_vvc_cmd);
+        populate_shared_vvc_cmd_with_broadcast(output_vvc_cmd, vvc_labels.scope);
       else
         -- set VVC_BROADCAST to 0 to force a broadcast to wait for that VVC
         VVC_BROADCAST <= '0';
@@ -522,7 +532,24 @@ package body td_vvc_entity_support_pkg is
       release_semaphore(protected_semaphore);
     end if;
 
-    log(ID_CMD_INTERPRETER, to_string(output_vvc_cmd.proc_call) & ". Command received " & format_command_idx(output_vvc_cmd), vvc_labels.scope, vvc_config.msg_id_panel);    -- Get and ack the new command
+    log(ID_CMD_INTERPRETER, to_string(output_vvc_cmd.proc_call) & ". Command received" & format_command_idx(output_vvc_cmd), vvc_labels.scope, vvc_config.msg_id_panel);    -- Get and ack the new command
+  end procedure;
+
+  -- Overloading procedure - DEPRECATED
+  procedure await_cmd_from_sequencer(
+    constant vvc_labels        : in t_vvc_labels;
+    constant vvc_config        : in t_vvc_config;
+    signal VVCT                : in t_vvc_target_record;
+    signal VVC_BROADCAST       : inout std_logic;
+    signal global_vvc_busy     : inout std_logic;
+    signal vvc_ack             : out std_logic;
+    constant shared_vvc_cmd    : in t_vvc_cmd_record;
+    variable output_vvc_cmd    : out t_vvc_cmd_record
+    ) is
+  begin
+    deprecate(get_procedure_name_from_instance_name(vvc_labels'instance_name), "shared_vvc_cmd parameter is no longer in use. Please call this procedure without the shared_vvc_cmd parameter.");
+    await_cmd_from_sequencer(vvc_labels, vvc_config, VVCT, VVC_BROADCAST,
+                            global_vvc_busy, vvc_ack, output_vvc_cmd);
   end procedure;
 
 
@@ -557,7 +584,7 @@ package body td_vvc_entity_support_pkg is
   begin
     if wanted_idx = -1 then
       -- await completion of all commands
-      if command_queue.is_not_empty(VOID) or executor_is_busy then
+      if not command_queue.is_empty(VOID) or executor_is_busy then
         log(await_completion_pending_msg_id, "await_completion() - Pending completion " & to_string(command.msg) & " " & format_command_idx(command), to_string(vvc_labels.scope), vvc_config.msg_id_panel);    -- Get and ack the new command
         loop
           if command.timeout = 0 ns then
@@ -667,6 +694,11 @@ package body td_vvc_entity_support_pkg is
 
         if this_vvc_completed(VOID) then                   -- This VVC is done
           log(await_completion_finished_msg_id, "This VVC initiated completion of " & to_string(command.proc_call), to_string(vvc_labels.scope), vvc_config.msg_id_panel);
+
+          -- update shared_uvvm_status with the VVC name and cmd index that initiated the completion
+          shared_uvvm_status.info_on_finishing_await_any_completion.vvc_name(1 to vvc_labels.vvc_name'length) := vvc_labels.vvc_name;
+          shared_uvvm_status.info_on_finishing_await_any_completion.vvc_cmd_idx := last_cmd_idx_executed;
+          shared_uvvm_status.info_on_finishing_await_any_completion.vvc_time_of_completion := now;
           exit;
         end if;
 
@@ -720,11 +752,14 @@ package body td_vvc_entity_support_pkg is
     constant command              : in t_vvc_cmd_record;
     constant vvc_config           : in t_vvc_config;
     constant vvc_labels           : in t_vvc_labels;
-    signal terminate_current_cmd  : inout t_flag_record
+    signal terminate_current_cmd  : inout t_flag_record;
+    constant executor_is_busy     : in boolean := true
     ) is
   begin
-    log(ID_IMMEDIATE_CMD, "Terminating command in executor", to_string(vvc_labels.scope), vvc_config.msg_id_panel);
-    set_flag(terminate_current_cmd);
+    if executor_is_busy then
+      log(ID_IMMEDIATE_CMD, "Terminating command in executor", to_string(vvc_labels.scope), vvc_config.msg_id_panel);
+      set_flag(terminate_current_cmd);
+    end if;
   end procedure;
 
   procedure interpreter_fetch_result(
@@ -796,7 +831,9 @@ package body td_vvc_entity_support_pkg is
     constant vvc_labels           : in t_vvc_labels
     ) is
   begin
-    executor_is_busy  <= false;
+    executor_is_busy            <= false;
+    vvc_status.previous_cmd_idx := command.cmd_idx;
+
     wait for 0 ns;  -- to allow delta updates in other processes.
     if command_queue.is_empty(VOID) then
       log(ID_CMD_EXECUTOR_WAIT, "Executor: Waiting for command", to_string(vvc_labels.scope), vvc_config.msg_id_panel);
@@ -806,7 +843,6 @@ package body td_vvc_entity_support_pkg is
     -- Queue is now not empty
     executor_is_busy  <= true;
     wait until executor_is_busy;
-    vvc_status.previous_cmd_idx := command.cmd_idx;
     command := command_queue.get(VOID);
     log(ID_CMD_EXECUTOR, to_string(command.proc_call) & " - Will be executed " & format_command_idx(command), to_string(vvc_labels.scope), vvc_config.msg_id_panel);    -- Get and ack the new command
     vvc_status.pending_cmd_cnt := command_queue.get_count(VOID);

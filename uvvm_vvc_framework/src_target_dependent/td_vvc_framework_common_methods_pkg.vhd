@@ -1,6 +1,6 @@
 --========================================================================================================================
 -- Copyright (c) 2017 by Bitvis AS.  All rights reserved.
--- You should have received a copy of the license file containing the MIT License (see LICENSE.TXT), if not, 
+-- You should have received a copy of the license file containing the MIT License (see LICENSE.TXT), if not,
 -- contact Bitvis AS <support@bitvis.no>.
 --
 -- UVVM AND ANY PART THEREOF ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
@@ -51,7 +51,8 @@ package td_vvc_framework_common_methods_pkg is
     constant vvc_instance_idx   : in integer;
     constant vvc_channel        : in t_channel;
     constant timeout            : in time;
-    constant msg                : in string        := ""
+    constant msg                : in string        := "";
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -------------------------------------------
@@ -62,7 +63,8 @@ package td_vvc_framework_common_methods_pkg is
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
     constant timeout            : in time;
-    constant msg                : in string        := ""
+    constant msg                : in string        := "";
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -------------------------------------------
@@ -77,7 +79,8 @@ package td_vvc_framework_common_methods_pkg is
     constant vvc_channel        : in t_channel;
     constant wanted_idx         : in natural;
     constant timeout            : in time;
-    constant msg                : in string        := ""
+    constant msg                : in string        := "";
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -------------------------------------------
@@ -89,15 +92,16 @@ package td_vvc_framework_common_methods_pkg is
     constant vvc_instance_idx   : in integer;
     constant wanted_idx         : in natural;
     constant timeout            : in time;
-    constant msg                : in string        := ""
+    constant msg                : in string        := "";
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -------------------------------------------
   -- await_any_completion
   -------------------------------------------
   -- VVC interpreter IMMEDIATE command
-  -- - Waits for the first of multiple VVCs to finish : 
-  --   - Awaits completion of all commands in the queue for the specified VVC, or 
+  -- - Waits for the first of multiple VVCs to finish :
+  --   - Awaits completion of all commands in the queue for the specified VVC, or
   --   - until global_awaiting_completion /= '1' (any of the other involved VVCs completed).
   procedure await_any_completion(
     signal   vvc_target         : inout t_vvc_target_record;
@@ -105,8 +109,9 @@ package td_vvc_framework_common_methods_pkg is
     constant vvc_channel        : in t_channel;
     constant lastness           : in t_lastness;
     constant timeout            : in time          := 100 ns;
-    constant msg                : in string        := ""; 
-    constant awaiting_completion_idx : in natural := 0
+    constant msg                : in string        := "";
+    constant awaiting_completion_idx : in natural  := 0;
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -- Overload without vvc_channel
@@ -115,8 +120,9 @@ package td_vvc_framework_common_methods_pkg is
     constant vvc_instance_idx   : in integer;
     constant lastness           : in t_lastness;
     constant timeout            : in time          := 100 ns;
-    constant msg                : in string        := ""; 
-    constant awaiting_completion_idx : in natural := 0
+    constant msg                : in string        := "";
+    constant awaiting_completion_idx : in natural  := 0;
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -- Overload with wanted_idx
@@ -129,8 +135,9 @@ package td_vvc_framework_common_methods_pkg is
     constant wanted_idx         : in natural;
     constant lastness           : in t_lastness;
     constant timeout            : in time          := 100 ns;
-    constant msg                : in string        := ""; 
-    constant awaiting_completion_idx : in natural := 0
+    constant msg                : in string        := "";
+    constant awaiting_completion_idx : in natural  := 0;
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -- Overload without vvc_channel
@@ -140,9 +147,10 @@ package td_vvc_framework_common_methods_pkg is
     constant wanted_idx         : in natural;
     constant lastness           : in t_lastness;
     constant timeout            : in time          := 100 ns;
-    constant msg                : in string        := ""; 
-    constant awaiting_completion_idx : in natural := 0
-  ); 
+    constant msg                : in string        := "";
+    constant awaiting_completion_idx : in natural  := 0;
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
+  );
 
   -------------------------------------------
   -- disable_log_msg
@@ -155,7 +163,8 @@ package td_vvc_framework_common_methods_pkg is
     constant vvc_channel        : in t_channel;
     constant msg_id             : in t_msg_id;
     constant msg                : in string := "";
-    constant quietness          : t_quietness := NON_QUIET
+    constant quietness          : t_quietness := NON_QUIET;
+    constant scope              : in string   := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -------------------------------------------
@@ -167,7 +176,8 @@ package td_vvc_framework_common_methods_pkg is
     constant vvc_instance_idx   : in integer;
     constant msg_id             : in t_msg_id;
     constant msg                : in string := "";
-    constant quietness          : t_quietness := NON_QUIET
+    constant quietness          : t_quietness := NON_QUIET;
+    constant scope              : in string   := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
 
@@ -182,7 +192,8 @@ package td_vvc_framework_common_methods_pkg is
     constant vvc_channel        : in t_channel;
     constant msg_id             : in t_msg_id;
     constant msg                : in string := "";
-    constant quietness          : t_quietness := NON_QUIET
+    constant quietness          : t_quietness := NON_QUIET;
+    constant scope              : in string   := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -------------------------------------------
@@ -194,7 +205,8 @@ package td_vvc_framework_common_methods_pkg is
     constant vvc_instance_idx   : in integer;
     constant msg_id             : in t_msg_id;
     constant msg                : in string := "";
-    constant quietness          : t_quietness := NON_QUIET
+    constant quietness          : t_quietness := NON_QUIET;
+    constant scope              : in string   := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
 
@@ -207,7 +219,8 @@ package td_vvc_framework_common_methods_pkg is
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
     constant vvc_channel        : in t_channel;
-    constant msg                : in string := ""
+    constant msg                : in string := "";
+    constant scope              : in string := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -------------------------------------------
@@ -217,7 +230,8 @@ package td_vvc_framework_common_methods_pkg is
   procedure flush_command_queue(
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
-    constant msg                : in string := ""
+    constant msg                : in string := "";
+    constant scope              : in string := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -------------------------------------------
@@ -227,7 +241,7 @@ package td_vvc_framework_common_methods_pkg is
   -- - Fetches result from a VVC
   -- - Requires that result is available (i.e. already executed in respective VVC)
   -- - Logs with ID ID_UVVM_CMD_RESULT
-  -- The 'result' parameter is of type t_vvc_result to 
+  -- The 'result' parameter is of type t_vvc_result to
   -- support that the BFM returns something other than a std_logic_vector.
   procedure fetch_result(
     signal   vvc_target         : inout t_vvc_target_record;
@@ -238,7 +252,8 @@ package td_vvc_framework_common_methods_pkg is
     variable fetch_is_accepted  : out boolean;
     constant msg                : in string         := "";
     constant alert_level        : in t_alert_level  := TB_ERROR;
-    constant caller_name        : in string         := "base_procedure"
+    constant caller_name        : in string         := "base_procedure";
+    constant scope              : in string         := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
   -- -- Same as above but without fetch_is_accepted.
   -- -- Will trigger alert with alert_level if not OK.
@@ -249,7 +264,8 @@ package td_vvc_framework_common_methods_pkg is
     constant wanted_idx         : in integer;
     variable result             : out t_vvc_result;
     constant msg                : in string         := "";
-    constant alert_level        : in t_alert_level  := TB_ERROR
+    constant alert_level        : in t_alert_level  := TB_ERROR;
+    constant scope              : in string         := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
   -- -- - This version does not use vvc_channel.
   -- -- - Fetches result from a VVC
@@ -262,7 +278,8 @@ package td_vvc_framework_common_methods_pkg is
     variable result             : out t_vvc_result;
     variable fetch_is_accepted  : out boolean;
     constant msg                : in string         := "";
-    constant alert_level        : in t_alert_level  := TB_ERROR
+    constant alert_level        : in t_alert_level  := TB_ERROR;
+    constant scope              : in string         := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
   -- -- Same as above but without fetch_is_accepted.
   -- -- Will trigger alert with alert_level if not OK.
@@ -272,9 +289,10 @@ package td_vvc_framework_common_methods_pkg is
     constant wanted_idx         : in integer;
     variable result             : out t_vvc_result;
     constant msg                : in string         := "";
-    constant alert_level        : in t_alert_level  := TB_ERROR
+    constant alert_level        : in t_alert_level  := TB_ERROR;
+    constant scope              : in string         := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
-  
+
   -------------------------------------------
   -- insert_delay
   -------------------------------------------
@@ -285,7 +303,8 @@ package td_vvc_framework_common_methods_pkg is
     constant vvc_instance_idx   : in integer;
     constant vvc_channel        : in t_channel;
     constant delay              : in natural;  -- in clock cycles
-    constant msg                : in string  := ""
+    constant msg                : in string  := "";
+    constant scope              : in string  := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -------------------------------------------
@@ -296,7 +315,8 @@ package td_vvc_framework_common_methods_pkg is
     signal   vvc_target           : inout t_vvc_target_record;
     constant vvc_instance_idx     : in integer;
     constant delay                : in natural;  -- in clock cycles
-    constant msg                  : in string  := ""
+    constant msg                  : in string  := "";
+    constant scope                : in string  := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -------------------------------------------
@@ -309,7 +329,8 @@ package td_vvc_framework_common_methods_pkg is
     constant vvc_instance_idx   : in integer;
     constant vvc_channel        : in t_channel;
     constant delay              : in time;
-    constant msg                : in string  := ""
+    constant msg                : in string  := "";
+    constant scope              : in string  := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
   -------------------------------------------
@@ -320,7 +341,8 @@ package td_vvc_framework_common_methods_pkg is
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
     constant delay              : in time;
-    constant msg                : in string  := ""
+    constant msg                : in string  := "";
+    constant scope              : in string  := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
 
 
@@ -333,8 +355,17 @@ package td_vvc_framework_common_methods_pkg is
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
     constant vvc_channel        : in t_channel   := NA;
-    constant msg                : in string      := ""
+    constant msg                : in string      := "";
+    constant scope              : in string      := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
+  -- Overload without VVC channel
+  procedure terminate_current_command(
+    signal   vvc_target         : inout t_vvc_target_record;
+    constant vvc_instance_idx   : in integer;
+    constant msg                : in string      := "";
+    constant scope              : in string      := C_TB_SCOPE_DEFAULT & "(uvvm)"
+  );
+
 
   -------------------------------------------
   -- terminate_all_commands
@@ -346,15 +377,24 @@ package td_vvc_framework_common_methods_pkg is
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
     constant vvc_channel        : in t_channel   := NA;
-    constant msg                : in string      := ""
+    constant msg                : in string      := "";
+    constant scope              : in string      := C_TB_SCOPE_DEFAULT & "(uvvm)"
   );
+  -- Overload without VVC channel
+  procedure terminate_all_commands(
+    signal   vvc_target         : inout t_vvc_target_record;
+    constant vvc_instance_idx   : in integer;
+    constant msg                : in string      := "";
+    constant scope              : in string      := C_TB_SCOPE_DEFAULT & "(uvvm)"
+  );
+
 
   -- Returns the index of the last queued command
   impure function get_last_received_cmd_idx(
     signal   vvc_target         : in  t_vvc_target_record;
     constant vvc_instance_idx   : in  integer;
     constant vvc_channel        : in  t_channel := NA;
-    constant msg                : in  string    := ""
+    constant scope              : in  string    := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) return natural;
 
 end package td_vvc_framework_common_methods_pkg;
@@ -380,7 +420,8 @@ package body td_vvc_framework_common_methods_pkg is
     constant vvc_instance_idx   : in integer;
     constant vvc_channel        : in t_channel;
     constant timeout            : in time;
-    constant msg                : in string        := ""
+    constant msg                : in string        := "";
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
     constant proc_name : string := "await_completion";
     constant proc_call : string := proc_name & "(" & to_string(vvc_target, vvc_instance_idx, vvc_channel)  -- First part common for all
@@ -392,17 +433,18 @@ package body td_vvc_framework_common_methods_pkg is
     set_general_target_and_command_fields(vvc_target, vvc_instance_idx, vvc_channel, proc_call, msg, IMMEDIATE, AWAIT_COMPLETION);
     shared_vvc_cmd.gen_integer_array(0)  := -1;  -- All commands must be completed (i.e. not just a selected command index)
     shared_vvc_cmd.timeout               := timeout;
-    send_command_to_vvc(vvc_target, timeout);
+    send_command_to_vvc(vvc_target, timeout, scope);
   end procedure;
 
   procedure await_completion(
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
     constant timeout            : in time;
-    constant msg                : in string        := ""
+    constant msg                : in string        := "";
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
   begin
-    await_completion(vvc_target, vvc_instance_idx, NA, timeout, msg);
+    await_completion(vvc_target, vvc_instance_idx, NA, timeout, msg, scope);
   end procedure;
 
   procedure await_completion(
@@ -411,7 +453,8 @@ package body td_vvc_framework_common_methods_pkg is
     constant vvc_channel        : in t_channel;
     constant wanted_idx         : in natural;
     constant timeout            : in time;
-    constant msg                : in string        := ""
+    constant msg                : in string        := "";
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
     constant proc_name : string := "await_completion";
     constant proc_call : string := proc_name & "(" & to_string(vvc_target, vvc_instance_idx, vvc_channel)  -- First part common for all
@@ -423,7 +466,7 @@ package body td_vvc_framework_common_methods_pkg is
     set_general_target_and_command_fields(vvc_target, vvc_instance_idx, vvc_channel, proc_call, msg, IMMEDIATE, AWAIT_COMPLETION);
     shared_vvc_cmd.gen_integer_array(0)  := wanted_idx;
     shared_vvc_cmd.timeout      := timeout;
-    send_command_to_vvc(vvc_target, timeout);
+    send_command_to_vvc(vvc_target, timeout, scope);
   end procedure;
 
   procedure await_completion(
@@ -431,10 +474,11 @@ package body td_vvc_framework_common_methods_pkg is
     constant vvc_instance_idx   : in integer;
     constant wanted_idx         : in natural;
     constant timeout            : in time;
-    constant msg                : in string        := ""
+    constant msg                : in string        := "";
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
   begin
-    await_completion(vvc_target, vvc_instance_idx, NA, wanted_idx, timeout, msg);
+    await_completion(vvc_target, vvc_instance_idx, NA, wanted_idx, timeout, msg, scope);
   end procedure;
 
   procedure await_any_completion(
@@ -443,8 +487,9 @@ package body td_vvc_framework_common_methods_pkg is
     constant vvc_channel        : in t_channel;
     constant lastness           : in t_lastness;
     constant timeout            : in time          := 100 ns;
-    constant msg                : in string        := ""; 
-    constant awaiting_completion_idx : in natural := 0 -- Useful when being called by multiple sequencers
+    constant msg                : in string        := "";
+    constant awaiting_completion_idx : in natural  := 0; -- Useful when being called by multiple sequencers
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
     constant proc_name : string := "await_any_completion";
     constant proc_call : string := proc_name & "(" & to_string(vvc_target, vvc_instance_idx, vvc_channel)  -- First part common for all
@@ -455,14 +500,14 @@ package body td_vvc_framework_common_methods_pkg is
     -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(vvc_target, vvc_instance_idx, vvc_channel, proc_call, msg, IMMEDIATE, AWAIT_ANY_COMPLETION);
     shared_vvc_cmd.gen_integer_array(0) := -1;                       -- All commands must be completed (i.e. not just a selected command index)
-    shared_vvc_cmd.gen_integer_array(1) := awaiting_completion_idx;   
+    shared_vvc_cmd.gen_integer_array(1) := awaiting_completion_idx;
     shared_vvc_cmd.timeout      := timeout;
-    if lastness = LAST then 
-      shared_vvc_cmd.gen_boolean := true; -- LAST 
-    else 
-      shared_vvc_cmd.gen_boolean := false; -- NOT_LAST 
-    end if; 
-    send_command_to_vvc(vvc_target, timeout); -- sets vvc_target.trigger, then waits until global_vvc_ack = '1' for timeout
+    if lastness = LAST then
+      shared_vvc_cmd.gen_boolean := true; -- LAST
+    else
+      shared_vvc_cmd.gen_boolean := false; -- NOT_LAST
+    end if;
+    send_command_to_vvc(vvc_target, timeout, scope); -- sets vvc_target.trigger, then waits until global_vvc_ack = '1' for timeout
   end procedure;
 
   procedure await_any_completion(
@@ -470,11 +515,12 @@ package body td_vvc_framework_common_methods_pkg is
     constant vvc_instance_idx   : in integer;
     constant lastness           : in t_lastness;
     constant timeout            : in time          := 100 ns;
-    constant msg                : in string        := ""; 
-    constant awaiting_completion_idx : in natural := 0
+    constant msg                : in string        := "";
+    constant awaiting_completion_idx : in natural  := 0;
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
   begin
-    await_any_completion(vvc_target, vvc_instance_idx, NA, lastness, timeout, msg, awaiting_completion_idx);
+    await_any_completion(vvc_target, vvc_instance_idx, NA, lastness, timeout, msg, awaiting_completion_idx, scope);
   end procedure;
 
   -- The two below are as the two above, except with wanted_idx as parameter
@@ -485,8 +531,9 @@ package body td_vvc_framework_common_methods_pkg is
     constant wanted_idx         : in natural;
     constant lastness           : in t_lastness;
     constant timeout            : in time          := 100 ns;
-    constant msg                : in string        := ""; 
-    constant awaiting_completion_idx : in natural := 0  -- Useful when being called by multiple sequencers
+    constant msg                : in string        := "";
+    constant awaiting_completion_idx : in natural  := 0;  -- Useful when being called by multiple sequencers
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
     constant proc_name : string := "await_any_completion";
     constant proc_call : string := proc_name & "(" & to_string(vvc_target, vvc_instance_idx, vvc_channel)  -- First part common for all
@@ -497,17 +544,17 @@ package body td_vvc_framework_common_methods_pkg is
     -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(vvc_target, vvc_instance_idx, vvc_channel, proc_call, msg, IMMEDIATE, AWAIT_ANY_COMPLETION);
     shared_vvc_cmd.gen_integer_array(0)  := wanted_idx;
-    shared_vvc_cmd.gen_integer_array(1) := awaiting_completion_idx;   
+    shared_vvc_cmd.gen_integer_array(1) := awaiting_completion_idx;
     shared_vvc_cmd.timeout      := timeout;
-    if lastness = LAST then 
-      -- LAST 
-      shared_vvc_cmd.gen_boolean := true; 
-    else 
+    if lastness = LAST then
+      -- LAST
+      shared_vvc_cmd.gen_boolean := true;
+    else
       -- NOT_LAST : Timeout must be handled in interpreter_await_any_completion
       -- becuase the command is always acknowledged immediately by the VVC to allow the sequencer to continue
       shared_vvc_cmd.gen_boolean := false;
-    end if; 
-    send_command_to_vvc(vvc_target, timeout);
+    end if;
+    send_command_to_vvc(vvc_target, timeout, scope);
   end procedure;
 
   procedure await_any_completion(
@@ -516,11 +563,12 @@ package body td_vvc_framework_common_methods_pkg is
     constant wanted_idx         : in natural;
     constant lastness           : in t_lastness;
     constant timeout            : in time          := 100 ns;
-    constant msg                : in string        := ""; 
-    constant awaiting_completion_idx : in natural := 0 -- Useful when being called by multiple sequencers
+    constant msg                : in string        := "";
+    constant awaiting_completion_idx : in natural  := 0; -- Useful when being called by multiple sequencers
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
   begin
-    await_any_completion(vvc_target, vvc_instance_idx, NA, wanted_idx, lastness, timeout, msg, awaiting_completion_idx);
+    await_any_completion(vvc_target, vvc_instance_idx, NA, wanted_idx, lastness, timeout, msg, awaiting_completion_idx, scope);
   end procedure;
 
   procedure disable_log_msg(
@@ -529,7 +577,8 @@ package body td_vvc_framework_common_methods_pkg is
     constant vvc_channel        : in t_channel;
     constant msg_id             : in t_msg_id;
     constant msg                : in string := "";
-    constant quietness          : t_quietness := NON_QUIET
+    constant quietness          : t_quietness := NON_QUIET;
+    constant scope              : in string   := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
     constant proc_name : string := "disable_log_msg";
     constant proc_call : string := proc_name & "(" & to_string(vvc_target, vvc_instance_idx, vvc_channel)  -- First part common for all
@@ -541,7 +590,7 @@ package body td_vvc_framework_common_methods_pkg is
     set_general_target_and_command_fields(vvc_target, vvc_instance_idx, vvc_channel, proc_call, msg, IMMEDIATE, DISABLE_LOG_MSG);
     shared_vvc_cmd.msg_id  := msg_id;
     shared_vvc_cmd.quietness := quietness;
-    send_command_to_vvc(vvc_target);
+    send_command_to_vvc(vvc_target, scope => scope);
   end procedure;
 
   procedure disable_log_msg(
@@ -549,10 +598,11 @@ package body td_vvc_framework_common_methods_pkg is
     constant vvc_instance_idx   : in integer;
     constant msg_id             : in t_msg_id;
     constant msg                : in string := "";
-    constant quietness          : t_quietness := NON_QUIET
+    constant quietness          : t_quietness := NON_QUIET;
+    constant scope              : in string   := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
   begin
-    disable_log_msg(vvc_target, vvc_instance_idx, NA, msg_id, msg, quietness);
+    disable_log_msg(vvc_target, vvc_instance_idx, NA, msg_id, msg, quietness, scope);
   end procedure;
 
   procedure enable_log_msg(
@@ -561,7 +611,8 @@ package body td_vvc_framework_common_methods_pkg is
     constant vvc_channel        : in t_channel;
     constant msg_id             : in t_msg_id;
     constant msg                : in string := "";
-    constant quietness          : t_quietness := NON_QUIET
+    constant quietness          : t_quietness := NON_QUIET;
+    constant scope              : in string   := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
     constant proc_name : string := "enable_log_msg";
     constant proc_call : string := proc_name & "(" & to_string(vvc_target, vvc_instance_idx, vvc_channel)  -- First part common for all
@@ -573,7 +624,7 @@ package body td_vvc_framework_common_methods_pkg is
     set_general_target_and_command_fields(vvc_target, vvc_instance_idx, vvc_channel, proc_call, msg, IMMEDIATE, ENABLE_LOG_MSG);
     shared_vvc_cmd.msg_id  := msg_id;
     shared_vvc_cmd.quietness := quietness;
-    send_command_to_vvc(vvc_target);
+    send_command_to_vvc(vvc_target, scope => scope);
   end procedure;
 
   procedure enable_log_msg(
@@ -581,17 +632,19 @@ package body td_vvc_framework_common_methods_pkg is
     constant vvc_instance_idx   : in integer;
     constant msg_id             : in t_msg_id;
     constant msg                : in string := "";
-    constant quietness          : t_quietness := NON_QUIET
+    constant quietness          : t_quietness := NON_QUIET;
+    constant scope              : in string   := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
   begin
-    enable_log_msg(vvc_target, vvc_instance_idx, NA, msg_id, msg, quietness);
+    enable_log_msg(vvc_target, vvc_instance_idx, NA, msg_id, msg, quietness, scope);
   end procedure;
 
   procedure flush_command_queue(
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
     constant vvc_channel        : in t_channel;
-    constant msg                : in string := ""
+    constant msg                : in string := "";
+    constant scope              : in string := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
     constant proc_name : string := "flush_command_queue";
     constant proc_call : string := proc_name & "(" & to_string(vvc_target, vvc_instance_idx, vvc_channel) & ")";
@@ -600,16 +653,17 @@ package body td_vvc_framework_common_methods_pkg is
     -- locking semaphore in set_general_target_and_command_fields to gain exclusive right to VVCT and shared_vvc_cmd
     -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(vvc_target, vvc_instance_idx, vvc_channel, proc_call, msg, IMMEDIATE, FLUSH_COMMAND_QUEUE);
-    send_command_to_vvc(vvc_target);
+    send_command_to_vvc(vvc_target, scope => scope);
   end procedure;
 
   procedure flush_command_queue(
-    signal   vvc_target     : inout t_vvc_target_record;
+    signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
-    constant msg            : in string := ""
+    constant msg                : in string := "";
+    constant scope              : in string := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
   begin
-    flush_command_queue(vvc_target, vvc_instance_idx, NA, msg);
+    flush_command_queue(vvc_target, vvc_instance_idx, NA, msg, scope);
   end procedure;
 
   -- Requires that result is available (i.e. already executed in respective VVC)
@@ -623,7 +677,8 @@ package body td_vvc_framework_common_methods_pkg is
     variable fetch_is_accepted  : out   boolean;
     constant msg                : in    string    := "";
     constant alert_level        : in    t_alert_level := TB_ERROR;
-    constant caller_name        : in    string    := "base_procedure"
+    constant caller_name        : in    string    := "base_procedure";
+    constant scope              : in    string    := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
     constant proc_name : string := "fetch_result";
     constant proc_call : string := proc_name & "(" & to_string(vvc_target, vvc_instance_idx, vvc_channel)  -- First part common for all
@@ -635,12 +690,12 @@ package body td_vvc_framework_common_methods_pkg is
     -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(vvc_target, vvc_instance_idx, vvc_channel, proc_call, msg, IMMEDIATE, FETCH_RESULT);
     shared_vvc_cmd.gen_integer_array(0)  := wanted_idx;
-    send_command_to_vvc(vvc_target);
+    send_command_to_vvc(vvc_target, scope => scope);
     -- Post process
     result  := shared_vvc_response.result;
     fetch_is_accepted   := shared_vvc_response.fetch_is_accepted;
     if caller_name = "base_procedure" then
-      log(ID_UVVM_CMD_RESULT, proc_call & ": Legal=>" & to_string(shared_vvc_response.fetch_is_accepted) & ", Result=>" & to_string(result) & format_command_idx(shared_cmd_idx), C_SCOPE);    -- Get and ack the new command
+      log(ID_UVVM_CMD_RESULT, proc_call & ": Legal=>" & to_string(shared_vvc_response.fetch_is_accepted) & ", Result=>" & to_string(result) & format_command_idx(shared_cmd_idx), scope);    -- Get and ack the new command
     end if;
     release_semaphore(protected_response_semaphore);
   end procedure;
@@ -652,19 +707,20 @@ package body td_vvc_framework_common_methods_pkg is
     constant wanted_idx         : in    integer;
     variable result             : out   t_vvc_result;
     constant msg                : in    string    := "";
-    constant alert_level        : in    t_alert_level := TB_ERROR
+    constant alert_level        : in    t_alert_level := TB_ERROR;
+    constant scope              : in    string    := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
     variable v_fetch_is_accepted : boolean;
     constant proc_name           : string := "fetch_result";
     constant proc_call : string := proc_name & "(" & to_string(vvc_target, vvc_instance_idx, vvc_channel)  -- First part common for all
         & ", " & to_string(wanted_idx) & ")";
   begin
-    fetch_result(vvc_target, vvc_instance_idx, vvc_channel, wanted_idx, result, v_fetch_is_accepted, msg, alert_level, proc_name & "_with_check_of_ok");
+    fetch_result(vvc_target, vvc_instance_idx, vvc_channel, wanted_idx, result, v_fetch_is_accepted, msg, alert_level, proc_name & "_with_check_of_ok", scope);
     if v_fetch_is_accepted then
-      log(ID_UVVM_CMD_RESULT, proc_call & ": Legal=>" & to_string(v_fetch_is_accepted) & ", Result=>" & format_command_idx(shared_cmd_idx), C_SCOPE);    -- Get and ack the new command
-    else  
+      log(ID_UVVM_CMD_RESULT, proc_call & ": Legal=>" & to_string(v_fetch_is_accepted) & ", Result=>" & format_command_idx(shared_cmd_idx), scope);    -- Get and ack the new command
+    else
       alert(alert_level, "fetch_result(" & to_string(wanted_idx) &  "): " & add_msg_delimiter(msg) & "." &
-          " Failed. Trying to fetch result from not yet executed command or from command with no result stored.  " & format_command_idx(shared_cmd_idx), C_SCOPE);
+          " Failed. Trying to fetch result from not yet executed command or from command with no result stored.  " & format_command_idx(shared_cmd_idx), scope);
     end if;
   end procedure;
 
@@ -675,31 +731,34 @@ package body td_vvc_framework_common_methods_pkg is
     variable result             : out   t_vvc_result;
     variable fetch_is_accepted  : out   boolean;
     constant msg                : in    string    := "";
-    constant alert_level        : in    t_alert_level := TB_ERROR
+    constant alert_level        : in    t_alert_level := TB_ERROR;
+    constant scope              : in    string    := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
   begin
-    fetch_result(vvc_target, vvc_instance_idx, NA, wanted_idx, result, fetch_is_accepted, msg, alert_level);
+    fetch_result(vvc_target, vvc_instance_idx, NA, wanted_idx, result, fetch_is_accepted, msg, alert_level, scope);
   end procedure;
-  
+
   procedure fetch_result(
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in    integer;
     constant wanted_idx         : in    integer;
     variable result             : out   t_vvc_result;
     constant msg                : in    string    := "";
-    constant alert_level        : in    t_alert_level := TB_ERROR
+    constant alert_level        : in    t_alert_level := TB_ERROR;
+    constant scope              : in    string    := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
   begin
-    fetch_result(vvc_target, vvc_instance_idx, NA, wanted_idx, result, msg, alert_level);
+    fetch_result(vvc_target, vvc_instance_idx, NA, wanted_idx, result, msg, alert_level, scope);
   end procedure;
-  
+
 
   procedure insert_delay(
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
     constant vvc_channel        : in t_channel;
     constant delay              : in natural;  -- in clock cycles
-    constant msg                : in string        := ""
+    constant msg                : in string  := "";
+    constant scope              : in string  := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
     constant proc_name : string := "insert_delay";
     constant proc_call : string := proc_name & "(" & to_string(vvc_target, vvc_instance_idx, vvc_channel)  -- First part common for all
@@ -710,17 +769,18 @@ package body td_vvc_framework_common_methods_pkg is
     -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(vvc_target, vvc_instance_idx, vvc_channel, proc_call, msg, QUEUED, INSERT_DELAY);
     shared_vvc_cmd.gen_integer_array(0)  := delay;
-    send_command_to_vvc(vvc_target);
+    send_command_to_vvc(vvc_target, scope => scope);
   end procedure;
 
   procedure insert_delay(
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
     constant delay              : in natural;  -- in clock cycles
-    constant msg                : in string        := ""
+    constant msg                : in string  := "";
+    constant scope              : in string  := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
   begin
-    insert_delay(vvc_target, vvc_instance_idx, NA, delay, msg);
+    insert_delay(vvc_target, vvc_instance_idx, NA, delay, msg, scope);
   end procedure;
 
 
@@ -729,7 +789,8 @@ package body td_vvc_framework_common_methods_pkg is
     constant vvc_instance_idx   : in integer;
     constant vvc_channel        : in t_channel;
     constant delay              : in time;
-    constant msg                : in string        := ""
+    constant msg                : in string  := "";
+    constant scope              : in string  := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
     constant proc_name : string := "insert_delay";
     constant proc_call : string := proc_name & "(" & to_string(vvc_target, vvc_instance_idx, vvc_channel)  -- First part common for all
@@ -740,17 +801,18 @@ package body td_vvc_framework_common_methods_pkg is
     -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(vvc_target, vvc_instance_idx, vvc_channel, proc_call, msg, QUEUED, INSERT_DELAY);
     shared_vvc_cmd.delay  := delay;
-    send_command_to_vvc(vvc_target);
+    send_command_to_vvc(vvc_target, scope => scope);
   end procedure;
 
   procedure insert_delay(
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
     constant delay              : in time;
-    constant msg                : in string        := ""
+    constant msg                : in string  := "";
+    constant scope              : in string  := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
   begin
-    insert_delay(vvc_target, vvc_instance_idx, NA, delay, msg);
+    insert_delay(vvc_target, vvc_instance_idx, NA, delay, msg, scope);
   end procedure;
 
 
@@ -758,7 +820,8 @@ package body td_vvc_framework_common_methods_pkg is
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
     constant vvc_channel        : in t_channel     := NA;
-    constant msg                : in string        := ""
+    constant msg                : in string        := "";
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
     constant proc_name : string := "terminate_current_command";
     constant proc_call : string := proc_name & "(" & to_string(vvc_target, vvc_instance_idx, vvc_channel)  -- First part common for all
@@ -768,7 +831,22 @@ package body td_vvc_framework_common_methods_pkg is
     -- locking semaphore in set_general_target_and_command_fields to gain exclusive right to VVCT and shared_vvc_cmd
     -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(vvc_target, vvc_instance_idx, vvc_channel, proc_call, msg, IMMEDIATE, TERMINATE_CURRENT_COMMAND);
-    send_command_to_vvc(vvc_target);
+    send_command_to_vvc(vvc_target, scope => scope);
+  end procedure;
+
+  -- Overload without VVC channel
+  procedure terminate_current_command(
+    signal   vvc_target         : inout t_vvc_target_record;
+    constant vvc_instance_idx   : in integer;
+    constant msg                : in string        := "";
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
+  ) is
+    constant vvc_channel        :  t_channel  := NA;
+    constant proc_name          : string      := "terminate_current_command";
+    constant proc_call          : string      := proc_name & "(" & to_string(vvc_target, vvc_instance_idx)  -- First part common for all
+        & ")";
+  begin
+    terminate_current_command(vvc_target, vvc_instance_idx, vvc_channel, msg, scope);
   end procedure;
 
 
@@ -776,24 +854,38 @@ package body td_vvc_framework_common_methods_pkg is
     signal   vvc_target         : inout t_vvc_target_record;
     constant vvc_instance_idx   : in integer;
     constant vvc_channel        : in t_channel     := NA;
-    constant msg                : in string        := ""
+    constant msg                : in string        := "";
+    constant scope              : in string        := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) is
   begin
     flush_command_queue(vvc_target, vvc_instance_idx, vvc_channel,msg);
-    terminate_current_command(vvc_target, vvc_instance_idx, vvc_channel, msg);
+    terminate_current_command(vvc_target, vvc_instance_idx, vvc_channel, msg, scope);
   end procedure;
-  
+
+  -- Overload without VVC channel
+  procedure terminate_all_commands(
+    signal   vvc_target         : inout t_vvc_target_record;
+    constant vvc_instance_idx   : in integer;
+    constant msg                : in string       := "";
+    constant scope              : in string       := C_TB_SCOPE_DEFAULT & "(uvvm)"
+  ) is
+    constant vvc_channel        : t_channel       := NA;
+  begin
+    terminate_all_commands(vvc_target, vvc_instance_idx, vvc_channel, msg, scope);
+  end procedure;
+
+
   -- Returns the index of the last queued command
   impure function get_last_received_cmd_idx(
     signal   vvc_target         : in  t_vvc_target_record;
     constant vvc_instance_idx   : in  integer;
     constant vvc_channel        : in  t_channel := NA;
-    constant msg                : in  string    := ""
+    constant scope              : in  string    := C_TB_SCOPE_DEFAULT & "(uvvm)"
   ) return natural is
     variable v_cmd_idx : integer := -1;
   begin
     v_cmd_idx := shared_vvc_last_received_cmd_idx(vvc_channel, vvc_instance_idx);
-    check_value(v_cmd_idx /= -1, tb_error, "Channel " & to_string(vvc_channel) & " not supported on VVC " & vvc_target.vvc_name, C_SCOPE, ID_NEVER);
+    check_value(v_cmd_idx /= -1, tb_error, "Channel " & to_string(vvc_channel) & " not supported on VVC " & vvc_target.vvc_name, scope, ID_NEVER);
     if v_cmd_idx /= -1 then
       return v_cmd_idx;
     else

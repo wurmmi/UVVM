@@ -1,6 +1,6 @@
 --========================================================================================================================
 -- Copyright (c) 2017 by Bitvis AS.  All rights reserved.
--- You should have received a copy of the license file containing the MIT License (see LICENSE.TXT), if not, 
+-- You should have received a copy of the license file containing the MIT License (see LICENSE.TXT), if not,
 -- contact Bitvis AS <support@bitvis.no>.
 --
 -- UVVM AND ANY PART THEREOF ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
@@ -35,7 +35,7 @@ use work.td_target_support_pkg.all;
 package vvc_methods_pkg is
 
   --===============================================================================================
-  -- Types and constants for the SPI VVC 
+  -- Types and constants for the SPI VVC
   --===============================================================================================
   constant C_VVC_NAME : string := "SPI_VVC";
 
@@ -55,10 +55,10 @@ package vvc_methods_pkg is
     cmd_queue_count_max                   : natural;  -- Maximum pending number in command queue before queue is full. Adding additional commands will result in an ERROR.
     cmd_queue_count_threshold             : natural;  -- An alert with severity 'cmd_queue_count_threshold_severity' will be issued if command queue exceeds this count. Used for early warning if command queue is almost full. Will be ignored if set to 0.
     cmd_queue_count_threshold_severity    : t_alert_level;  -- Severity of alert to be initiated if exceeding cmd_queue_count_threshold
-    result_queue_count_max                : natural;  -- Maximum number of unfetched results before result_queue is full. 
+    result_queue_count_max                : natural;  -- Maximum number of unfetched results before result_queue is full.
     result_queue_count_threshold_severity : t_alert_level;  -- An alert with severity 'result_queue_count_threshold_severity' will be issued if command queue exceeds this count. Used for early warning if result queue is almost full. Will be ignored if set to 0.
     result_queue_count_threshold          : natural;  -- Severity of alert to be initiated if exceeding result_queue_count_threshold
-    bfm_config                            : t_spi_bfm_config;  -- Configuration for the BFM. See BFM quick reference 
+    bfm_config                            : t_spi_bfm_config;  -- Configuration for the BFM. See BFM quick reference
     msg_id_panel                          : t_msg_id_panel;  -- VVC dedicated message ID panel
   end record;
 
@@ -120,14 +120,14 @@ package vvc_methods_pkg is
   shared variable shared_spi_vvc_status       : t_vvc_status_array(0 to C_MAX_VVC_INSTANCE_NUM)       := (others => C_VVC_STATUS_DEFAULT);
   shared variable shared_spi_transaction_info : t_transaction_info_array(0 to C_MAX_VVC_INSTANCE_NUM) := (others => C_TRANSACTION_INFO_DEFAULT);
 
-  --==============================================================================
-  -- Methods dedicated to this VVC
-  -- - These procedures are called from the testbench in order to queue BFM calls 
-  --   in the VVC command queue. The VVC will store and forward these calls to the 
-  --   SPI BFM when the command is at the from of the VVC command queue. 
-  -- - For details on how the BFM procedures work, see spi_bfm_pkg.vhd or the 
-  --   quickref.
-  --==============================================================================
+  --==========================================================================================
+  -- Methods dedicated to this VVC 
+  -- - These procedures are called from the testbench in order for the VVC to execute
+  --   BFM calls towards the given interface. The VVC interpreter will queue these calls
+  --   and then the VVC executor will fetch the commands from the queue and handle the
+  --   actual BFM execution.
+  --   For details on how the BFM procedures work, see the QuickRef.
+  --==========================================================================================
 
   ----------------------------------------------------------
   -- SPI_MASTER
@@ -138,7 +138,8 @@ package vvc_methods_pkg is
     constant vvc_instance_idx             : in    integer;
     constant data                         : in    std_logic_vector;
     constant msg                          : in    string;
-    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER
+    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
   -- Multi-word
   procedure spi_master_transmit_and_receive(
@@ -147,7 +148,8 @@ package vvc_methods_pkg is
     constant data                         : in    t_slv_array;
     constant msg                          : in    string;
     constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
-    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS
+    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
 
   -- Single-word
@@ -158,7 +160,8 @@ package vvc_methods_pkg is
     constant data_exp                     : in    std_logic_vector;
     constant msg                          : in    string;
     constant alert_level                  : in    t_alert_level                  := error;
-    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER
+    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
   -- Multi-word
   procedure spi_master_transmit_and_check(
@@ -169,7 +172,8 @@ package vvc_methods_pkg is
     constant msg                          : in    string;
     constant alert_level                  : in    t_alert_level                  := error;
     constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
-    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS
+    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
 
   -- Single-word
@@ -178,7 +182,8 @@ package vvc_methods_pkg is
     constant vvc_instance_idx             : in    integer;
     constant data                         : in    std_logic_vector;
     constant msg                          : in    string;
-    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER
+    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
   -- Multi-word
   procedure spi_master_transmit_only(
@@ -187,14 +192,18 @@ package vvc_methods_pkg is
     constant data                         : in    t_slv_array;
     constant msg                          : in    string;
     constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
-    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS
+    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
 
   procedure spi_master_receive_only(
     signal VVCT                           : inout t_vvc_target_record;
     constant vvc_instance_idx             : in    integer;
     constant msg                          : in    string;
-    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER
+    constant num_words                    : in    positive := 1;
+    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
+    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
 
   -- Single-word
@@ -204,7 +213,8 @@ package vvc_methods_pkg is
     constant data_exp                     : in    std_logic_vector;
     constant msg                          : in    string;
     constant alert_level                  : in    t_alert_level                  := error;
-    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER
+    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
   -- Multi-word
   procedure spi_master_check_only(
@@ -214,7 +224,8 @@ package vvc_methods_pkg is
     constant msg                          : in    string;
     constant alert_level                  : in    t_alert_level                  := error;
     constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
-    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS
+    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
 
   ----------------------------------------------------------
@@ -226,7 +237,8 @@ package vvc_methods_pkg is
     constant vvc_instance_idx       : in    integer;
     constant data                   : in    std_logic_vector;
     constant msg                    : in    string;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
   -- Multi-word
   procedure spi_slave_transmit_and_receive(
@@ -234,7 +246,8 @@ package vvc_methods_pkg is
     constant vvc_instance_idx       : in    integer;
     constant data                   : in    t_slv_array;
     constant msg                    : in    string;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
 
   -- Single-word
@@ -245,7 +258,8 @@ package vvc_methods_pkg is
     constant data_exp               : in    std_logic_vector;
     constant msg                    : in    string;
     constant alert_level            : in    t_alert_level            := error;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
   -- Multi-word
   procedure spi_slave_transmit_and_check(
@@ -255,7 +269,8 @@ package vvc_methods_pkg is
     constant data_exp               : in    t_slv_array;
     constant msg                    : in    string;
     constant alert_level            : in    t_alert_level            := error;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
 
   -- Single-word
@@ -264,7 +279,8 @@ package vvc_methods_pkg is
     constant vvc_instance_idx       : in    integer;
     constant data                   : in    std_logic_vector;
     constant msg                    : in    string;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
   -- Multi-word
   procedure spi_slave_transmit_only(
@@ -272,14 +288,17 @@ package vvc_methods_pkg is
     constant vvc_instance_idx       : in    integer;
     constant data                   : in    t_slv_array;
     constant msg                    : in    string;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
 
   procedure spi_slave_receive_only(
     signal VVCT                     : inout t_vvc_target_record;
     constant vvc_instance_idx       : in    integer;
     constant msg                    : in    string;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant num_words              : in    positive := 1;
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
 
   -- Single-word
@@ -289,7 +308,8 @@ package vvc_methods_pkg is
     constant data_exp               : in    std_logic_vector;
     constant msg                    : in    string;
     constant alert_level            : in    t_alert_level            := error;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
   -- Multi-word
   procedure spi_slave_check_only(
@@ -298,7 +318,8 @@ package vvc_methods_pkg is
     constant data_exp               : in    t_slv_array;
     constant msg                    : in    string;
     constant alert_level            : in    t_alert_level            := error;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     );
 
 
@@ -323,7 +344,8 @@ package body vvc_methods_pkg is
     constant vvc_instance_idx             : in    integer;
     constant data                         : in    std_logic_vector;
     constant msg                          : in    string;
-    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER
+    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name         : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call         : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -337,14 +359,14 @@ package body vvc_methods_pkg is
     -- Create command by setting common global 'VVCT' signal record and dedicated VVC 'shared_vvc_cmd' record
     shared_vvc_cmd                                   := C_VVC_CMD_DEFAULT;
     -- Locking semaphore in set_general_target_and_command_fields to gain exclusive right to VVCT and shared_vvc_cmd
-    -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC    
+    -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(VVCT, vvc_instance_idx, proc_call, msg, QUEUED, MASTER_TRANSMIT_AND_RECEIVE);
     shared_vvc_cmd.data(0)(v_word_length-1 downto 0) := v_normalized_data(0)(v_word_length-1 downto 0);
     shared_vvc_cmd.num_words                         := v_num_words;
     shared_vvc_cmd.word_length                       := v_word_length;
     shared_vvc_cmd.action_when_transfer_is_done      := action_when_transfer_is_done;
     shared_vvc_cmd.action_between_words              := RELEASE_LINE_BETWEEN_WORDS;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Multi-word
@@ -354,7 +376,8 @@ package body vvc_methods_pkg is
     constant data                         : in    t_slv_array;
     constant msg                          : in    string;
     constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
-    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS
+    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name         : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call         : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -368,14 +391,14 @@ package body vvc_methods_pkg is
     -- Create command by setting common global 'VVCT' signal record and dedicated VVC 'shared_vvc_cmd' record
     shared_vvc_cmd                              := C_VVC_CMD_DEFAULT;
     -- Locking semaphore in set_general_target_and_command_fields to gain exclusive right to VVCT and shared_vvc_cmd
-    -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC    
+    -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(VVCT, vvc_instance_idx, proc_call, msg, QUEUED, MASTER_TRANSMIT_AND_RECEIVE);
     shared_vvc_cmd.data                         := v_normalized_data;
     shared_vvc_cmd.num_words                    := v_num_words;
     shared_vvc_cmd.word_length                  := v_word_length;
     shared_vvc_cmd.action_when_transfer_is_done := action_when_transfer_is_done;
     shared_vvc_cmd.action_between_words         := action_between_words;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Single-word
@@ -385,8 +408,9 @@ package body vvc_methods_pkg is
     constant data                         : in    std_logic_vector;
     constant data_exp                     : in    std_logic_vector;
     constant msg                          : in    string;
-    constant alert_level                  : in    t_alert_level                  := error;    
-    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER
+    constant alert_level                  : in    t_alert_level                  := error;
+    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name             : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call             : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -403,7 +427,7 @@ package body vvc_methods_pkg is
     -- Create command by setting common global 'VVCT' signal record and dedicated VVC 'shared_vvc_cmd' record
     shared_vvc_cmd                                       := C_VVC_CMD_DEFAULT;
     -- Locking semaphore in set_general_target_and_command_fields to gain exclusive right to VVCT and shared_vvc_cmd
-    -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC    
+    -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(VVCT, vvc_instance_idx, proc_call, msg, QUEUED, MASTER_TRANSMIT_AND_CHECK);
     shared_vvc_cmd.data(0)(v_word_length-1 downto 0)     := v_normalized_data(0)(v_word_length-1 downto 0);
     shared_vvc_cmd.data_exp(0)(v_word_length-1 downto 0) := v_normalized_data_exp(0)(v_word_length-1 downto 0);
@@ -411,7 +435,7 @@ package body vvc_methods_pkg is
     shared_vvc_cmd.word_length                           := v_word_length;
     shared_vvc_cmd.action_when_transfer_is_done          := action_when_transfer_is_done;
     shared_vvc_cmd.alert_level                           := alert_level;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Multi-word
@@ -423,7 +447,8 @@ package body vvc_methods_pkg is
     constant msg                          : in    string;
     constant alert_level                  : in    t_alert_level                  := error;
     constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
-    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS
+    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name             : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call             : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -439,7 +464,7 @@ package body vvc_methods_pkg is
     -- Create command by setting common global 'VVCT' signal record and dedicated VVC 'shared_vvc_cmd' record
     shared_vvc_cmd                              := C_VVC_CMD_DEFAULT;
     -- Locking semaphore in set_general_target_and_command_fields to gain exclusive right to VVCT and shared_vvc_cmd
-    -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC   
+    -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(VVCT, vvc_instance_idx, proc_call, msg, QUEUED, MASTER_TRANSMIT_AND_CHECK);
     shared_vvc_cmd.data                         := v_normalized_data;
     shared_vvc_cmd.data_exp                     := v_normalized_data_exp;
@@ -448,7 +473,7 @@ package body vvc_methods_pkg is
     shared_vvc_cmd.action_when_transfer_is_done := action_when_transfer_is_done;
     shared_vvc_cmd.action_between_words         := action_between_words;
     shared_vvc_cmd.alert_level                  := alert_level;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Single-word
@@ -457,7 +482,8 @@ package body vvc_methods_pkg is
     constant vvc_instance_idx             : in    integer;
     constant data                         : in    std_logic_vector;
     constant msg                          : in    string;
-    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER
+    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name         : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call         : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -478,7 +504,7 @@ package body vvc_methods_pkg is
     shared_vvc_cmd.num_words                         := v_num_words;
     shared_vvc_cmd.word_length                       := v_word_length;
     shared_vvc_cmd.action_when_transfer_is_done      := action_when_transfer_is_done;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Multi-word
@@ -488,7 +514,8 @@ package body vvc_methods_pkg is
     constant data                         : in    t_slv_array;
     constant msg                          : in    string;
     constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
-    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS
+    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name         : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call         : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -509,7 +536,7 @@ package body vvc_methods_pkg is
     shared_vvc_cmd.word_length                  := v_word_length;
     shared_vvc_cmd.action_when_transfer_is_done := action_when_transfer_is_done;
     shared_vvc_cmd.action_between_words         := action_between_words;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Single-word
@@ -517,7 +544,10 @@ package body vvc_methods_pkg is
     signal VVCT                           : inout t_vvc_target_record;
     constant vvc_instance_idx             : in    integer;
     constant msg                          : in    string;
-    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER
+    constant num_words                    : in    positive := 1;
+    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
+    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name : string := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call : string := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -527,8 +557,10 @@ package body vvc_methods_pkg is
     -- Locking semaphore in set_general_target_and_command_fields to gain exclusive right to VVCT and shared_vvc_cmd
     -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(VVCT, vvc_instance_idx, proc_call, msg, QUEUED, MASTER_RECEIVE_ONLY);
+    shared_vvc_cmd.num_words                    := num_words;
     shared_vvc_cmd.action_when_transfer_is_done := action_when_transfer_is_done;
-    send_command_to_vvc(VVCT);
+    shared_vvc_cmd.action_between_words         := action_between_words;
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Single-word
@@ -538,7 +570,8 @@ package body vvc_methods_pkg is
     constant data_exp                     : in    std_logic_vector;
     constant msg                          : in    string;
     constant alert_level                  : in    t_alert_level                  := error;
-    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER
+    constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name             : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call             : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -560,7 +593,7 @@ package body vvc_methods_pkg is
     shared_vvc_cmd.word_length                           := v_word_length;
     shared_vvc_cmd.action_when_transfer_is_done          := action_when_transfer_is_done;
     shared_vvc_cmd.alert_level                           := alert_level;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Multi-word
@@ -571,7 +604,8 @@ package body vvc_methods_pkg is
     constant msg                          : in    string;
     constant alert_level                  : in    t_alert_level                  := error;
     constant action_when_transfer_is_done : in    t_action_when_transfer_is_done := RELEASE_LINE_AFTER_TRANSFER;
-    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS
+    constant action_between_words         : in    t_action_between_words         := HOLD_LINE_BETWEEN_WORDS;
+    constant scope                        : in    string                         := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name             : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call             : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -593,7 +627,7 @@ package body vvc_methods_pkg is
     shared_vvc_cmd.action_when_transfer_is_done := action_when_transfer_is_done;
     shared_vvc_cmd.action_between_words         := action_between_words;
     shared_vvc_cmd.alert_level                  := alert_level;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
 
@@ -606,7 +640,8 @@ package body vvc_methods_pkg is
     constant vvc_instance_idx       : in    integer;
     constant data                   : in    std_logic_vector;
     constant msg                    : in    string;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name         : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call         : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -620,13 +655,13 @@ package body vvc_methods_pkg is
     -- Create command by setting common global 'VVCT' signal record and dedicated VVC 'shared_vvc_cmd' record
     shared_vvc_cmd                                   := C_VVC_CMD_DEFAULT;
     -- locking semaphore in set_general_target_and_command_fields to gain exclusive right to VVCT and shared_vvc_cmd
-    -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC    
+    -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(VVCT, vvc_instance_idx, proc_call, msg, QUEUED, SLAVE_TRANSMIT_AND_RECEIVE);
     shared_vvc_cmd.data(0)(v_word_length-1 downto 0) := v_normalized_data(0)(v_word_length-1 downto 0);
     shared_vvc_cmd.num_words                         := v_num_words;
     shared_vvc_cmd.word_length                       := v_word_length;
     shared_vvc_cmd.when_to_start_transfer            := when_to_start_transfer;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Multi-word
@@ -635,7 +670,8 @@ package body vvc_methods_pkg is
     constant vvc_instance_idx       : in    integer;
     constant data                   : in    t_slv_array;
     constant msg                    : in    string;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name         : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call         : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -649,13 +685,13 @@ package body vvc_methods_pkg is
     -- Create command by setting common global 'VVCT' signal record and dedicated VVC 'shared_vvc_cmd' record
     shared_vvc_cmd                                                        := C_VVC_CMD_DEFAULT;
     -- locking semaphore in set_general_target_and_command_fields to gain exclusive right to VVCT and shared_vvc_cmd
-    -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC    
+    -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(VVCT, vvc_instance_idx, proc_call, msg, QUEUED, SLAVE_TRANSMIT_AND_RECEIVE);
-    shared_vvc_cmd.data(v_num_words-1 downto 0)(v_word_length-1 downto 0) := v_normalized_data(v_num_words-1 downto 0)(v_word_length-1 downto 0);
-    shared_vvc_cmd.num_words                                              := v_num_words;
-    shared_vvc_cmd.word_length                                            := v_word_length;
-    shared_vvc_cmd.when_to_start_transfer                                 := when_to_start_transfer;
-    send_command_to_vvc(VVCT);
+    shared_vvc_cmd.data                   := v_normalized_data;
+    shared_vvc_cmd.num_words              := v_num_words;
+    shared_vvc_cmd.word_length            := v_word_length;
+    shared_vvc_cmd.when_to_start_transfer := when_to_start_transfer;
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Single-word
@@ -666,7 +702,8 @@ package body vvc_methods_pkg is
     constant data_exp               : in    std_logic_vector;
     constant msg                    : in    string;
     constant alert_level            : in    t_alert_level            := error;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name             : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call             : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -691,7 +728,7 @@ package body vvc_methods_pkg is
     shared_vvc_cmd.word_length                           := v_word_length;
     shared_vvc_cmd.when_to_start_transfer                := when_to_start_transfer;
     shared_vvc_cmd.alert_level                           := alert_level;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Multi-word
@@ -702,7 +739,8 @@ package body vvc_methods_pkg is
     constant data_exp               : in    t_slv_array;
     constant msg                    : in    string;
     constant alert_level            : in    t_alert_level            := error;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name             : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call             : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -726,7 +764,7 @@ package body vvc_methods_pkg is
     shared_vvc_cmd.word_length            := v_word_length;
     shared_vvc_cmd.when_to_start_transfer := when_to_start_transfer;
     shared_vvc_cmd.alert_level            := alert_level;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Single-word
@@ -735,7 +773,8 @@ package body vvc_methods_pkg is
     constant vvc_instance_idx       : in    integer;
     constant data                   : in    std_logic_vector;
     constant msg                    : in    string;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name         : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call         : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -755,7 +794,7 @@ package body vvc_methods_pkg is
     shared_vvc_cmd.num_words                         := v_num_words;
     shared_vvc_cmd.word_length                       := v_word_length;
     shared_vvc_cmd.when_to_start_transfer            := when_to_start_transfer;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Multi-word
@@ -764,7 +803,8 @@ package body vvc_methods_pkg is
     constant vvc_instance_idx       : in    integer;
     constant data                   : in    t_slv_array;
     constant msg                    : in    string;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name         : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call         : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -785,7 +825,7 @@ package body vvc_methods_pkg is
     shared_vvc_cmd.num_words              := v_num_words;
     shared_vvc_cmd.word_length            := v_word_length;
     shared_vvc_cmd.when_to_start_transfer := when_to_start_transfer;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Single-word
@@ -793,7 +833,9 @@ package body vvc_methods_pkg is
     signal VVCT                     : inout t_vvc_target_record;
     constant vvc_instance_idx       : in    integer;
     constant msg                    : in    string;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant num_words              : in    positive := 1;
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name : string := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call : string := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -803,8 +845,9 @@ package body vvc_methods_pkg is
     -- locking semaphore in set_general_target_and_command_fields to gain exclusive right to VVCT and shared_vvc_cmd
     -- semaphore gets unlocked in await_cmd_from_sequencer of the targeted VVC
     set_general_target_and_command_fields(VVCT, vvc_instance_idx, proc_call, msg, QUEUED, SLAVE_RECEIVE_ONLY);
+    shared_vvc_cmd.num_words              := num_words;
     shared_vvc_cmd.when_to_start_transfer := when_to_start_transfer;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Single-word
@@ -814,7 +857,8 @@ package body vvc_methods_pkg is
     constant data_exp               : in    std_logic_vector;
     constant msg                    : in    string;
     constant alert_level            : in    t_alert_level            := error;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name             : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call             : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -836,7 +880,7 @@ package body vvc_methods_pkg is
     shared_vvc_cmd.word_length                           := v_word_length;
     shared_vvc_cmd.when_to_start_transfer                := when_to_start_transfer;
     shared_vvc_cmd.alert_level                           := alert_level;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
   -- Multi-word
@@ -846,7 +890,8 @@ package body vvc_methods_pkg is
     constant data_exp               : in    t_slv_array;
     constant msg                    : in    string;
     constant alert_level            : in    t_alert_level            := error;
-    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS
+    constant when_to_start_transfer : in    t_when_to_start_transfer := START_TRANSFER_ON_NEXT_SS;
+    constant scope                  : in    string                   := C_TB_SCOPE_DEFAULT & "(uvvm)"
     ) is
     constant proc_name             : string                                                                            := get_procedure_name_from_instance_name(vvc_instance_idx'instance_name);
     constant proc_call             : string                                                                            := proc_name & "(" & to_string(VVCT, vvc_instance_idx) & ")";
@@ -867,7 +912,7 @@ package body vvc_methods_pkg is
     shared_vvc_cmd.word_length            := v_word_length;
     shared_vvc_cmd.when_to_start_transfer := when_to_start_transfer;
     shared_vvc_cmd.alert_level            := alert_level;
-    send_command_to_vvc(VVCT);
+    send_command_to_vvc(VVCT, scope => scope);
   end procedure;
 
 
